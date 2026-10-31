@@ -104,7 +104,8 @@ uv run uvicorn app.main:app --reload
 ### Migraciones y seeders
 
 - **Migraciones:** `migrations/versions/0001_crear_tablas.py` crea `generos`, `usuarios`, `peliculas` y `resenas` desde cero. Se aplican con `uv run alembic upgrade head` y se revierten con `uv run alembic downgrade base`.
-- **Seeder disponible:** Géneros. Se ejecuta al iniciar la API si la tabla está vacía y mediante `uv run python -m app.seed`. No duplica datos en una tabla ya poblada ni repara cargas parciales. Los seeders de Usuarios, Películas y Reseñas, y la demostración de relaciones con datos iniciales, están pendientes.
+- **Seeder disponible:** Géneros. La carga inicial se ejecuta explícitamente mediante `uv run python -m app.seed`, después de aplicar las migraciones. Solo agrega los géneros de ejemplo si la tabla está vacía; si ya contiene registros, informa que omite la carga. No completa cargas parciales. Los seeders de Usuarios, Películas y Reseñas, y la demostración de relaciones con datos iniciales, están pendientes.
+- **Arranque de la API:** iniciar o reiniciar Uvicorn no crea tablas ni ejecuta seeders. Si Géneros está vacío, seguirá vacío hasta cargar datos mediante el comando explícito o crear registros mediante la API.
 - **Reiniciar sin borrar datos:** `docker compose restart db`. Para reiniciar solo la API, detener Uvicorn con Ctrl+C y volver a iniciarlo. No eliminar el volumen para comprobar persistencia.
 - **Restablecimiento destructivo:** `docker compose down -v` elimina el volumen y sus datos. Reservar su uso para una base de pruebas descartable; después hay que levantar PostgreSQL, aplicar migraciones y ejecutar la carga inicial.
 - **Persistencia:** los datos viven en el volumen `pgdata_resenas`; sobreviven al reinicio de la API y del contenedor.
@@ -114,8 +115,8 @@ uv run uvicorn app.main:app --reload
 ## Arquitectura por capas
 
 ```text
-app/main.py                  # crea y ensambla la API (routers, errores, lifespan)
-app/seed.py                  # carga inicial de datos
+app/main.py                  # crea y ensambla la API (routers y errores)
+app/seed.py                  # carga inicial explícita: python -m app.seed
 presentation/                # CAPA DE PRESENTACIÓN: recibe HTTP
     dependencies.py          #   sesión por solicitud e inyección de servicios
     error_handlers.py        #   errores -> JSON uniforme
