@@ -2,19 +2,18 @@ from fastapi import FastAPI
 
 from presentation.error_handlers import registrar_manejadores_de_errores
 from presentation.routers.genero_router import router as genero_router
-
-# --- Cada integrante reemplaza SU línea cuando termine su router ---
+from presentation.routers.pelicula_router import router as pelicula_router
 from presentation.routers.usuario_router import router as usuario_router
 
-# TODO(Miguel): from presentation.routers.pelicula_router import router as pelicula_router
-
-# TODO(Danna): from presentation.routers.resena_router import router as resena_router
+# TODO(Danna): importar resena_router.
 
 DESCRIPCION = """
 API REST para **reseñar películas** (estilo IMDb).
 
-El proyecto contempla un catálogo de películas y reseñas con puntuación
-de 1 a 10. Actualmente está disponible el CRUD de Géneros.
+Actualmente están disponibles los CRUD de Géneros, Usuarios y Películas.
+El catálogo permite filtrar, ordenar y paginar las películas.
+
+La funcionalidad de Reseñas está pendiente de integración.
 
 Todos los errores controlados usan la estructura:
 `{"error": {"code": "...", "message": "...", "details": []}}`.
@@ -32,9 +31,7 @@ app = FastAPI(
 registrar_manejadores_de_errores(app)
 
 app.include_router(genero_router)
-
 app.include_router(usuario_router)
-
-# TODO(Miguel): app.include_router(pelicula_router)
+app.include_router(pelicula_router)
 
 # TODO(Danna): app.include_router(resena_router)
