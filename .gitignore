@@ -1,0 +1,12 @@
+# Entorno y secretos (NUNCA subir credenciales reales)
+.venv/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Editores
+.idea/
+.vscode/

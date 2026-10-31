@@ -1,0 +1,86 @@
+### ============================================================
+### Pruebas manuales — API de Reseñas de Películas
+### Se ejecutan con la extensión "REST Client" (humao.rest-client) de
+### VS Code o importándolas en Thunder Client / Postman.
+### Antes: base de datos arriba, migraciones aplicadas y API iniciada.
+### ============================================================
+@baseUrl = http://localhost:8000
+
+
+### ---------- GÉNEROS (ya implementado) ----------
+
+### G1. Listar géneros -> 200
+GET {{baseUrl}}/generos
+
+### G2. Crear género -> 201
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{ "nombre": "Musical", "descripcion": "Películas con canciones." }
+
+### G3. Crear género duplicado -> 409 RESOURCE_CONFLICT
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{ "nombre": "Drama", "descripcion": "Repetido" }
+
+### G4. Validación de longitud (nombre de 1 letra) -> 422 VALIDATION_ERROR
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{ "nombre": "A" }
+
+### G5. Género inexistente -> 404 RESOURCE_NOT_FOUND
+GET {{baseUrl}}/generos/9999
+
+### G6. Actualizar género -> 200
+PUT {{baseUrl}}/generos/1
+Content-Type: application/json
+
+{ "nombre": "Acción", "descripcion": "Persecuciones y adrenalina.", "activo": true }
+
+
+### ---------- USUARIOS (TODO Matías) ----------
+### U1. Crear usuario -> 201
+### U2. Email con formato inválido -> 422
+### U3. Email repetido -> 409
+### U4. Listar usuarios paginado -> 200
+
+
+### ---------- PELÍCULAS (TODO Miguel) ----------
+### P1. Crear película -> 201
+### P2. Película con genero_id inexistente -> 404
+### P3. Duración 0 -> 422
+### P4. GET /peliculas?genero_id=2&ordenar_por=titulo&direccion=asc&pagina=1&limite=5 -> 200
+### P5. limite=1000 (fuera de rango) -> 422
+
+
+### ---------- RESEÑAS (TODO Danna) ----------
+### R1. Crear reseña -> 201
+### R2. Reseña repetida del mismo usuario a la misma película -> 409
+### R3. Película no estrenada -> 400
+### R4. Usuario inactivo -> 400
+### R5. Puntuación 11 -> 422
+### R6. GET /peliculas/{id}/resenas -> 200
+
+
+### G7. Crear género exclusivo para eliminación -> 201; copiar su ID en idBorrable
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{ "nombre": "Prueba eliminacion", "descripcion": "Dato temporal de prueba." }
+
+### Configurar con el ID devuelto por G7 (no asumir un ID fijo)
+@idBorrable = 999999
+
+### G8. Consultar el registro creado -> 200
+GET {{baseUrl}}/generos/{{idBorrable}}
+
+### G9. Eliminar género sin películas -> 204 sin cuerpo
+DELETE {{baseUrl}}/generos/{{idBorrable}}
+
+### G10. Consultar después de eliminar -> 404 uniforme
+GET {{baseUrl}}/generos/{{idBorrable}}
+
+### G11. Persistencia: crear; guardar ID; reiniciar SOLO la API; consultar ID -> 200
+# Repetir con un registro modificado. No ejecutar down -v ni borrar tablas.

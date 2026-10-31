@@ -1,0 +1,20 @@
+[project]
+name = "backend-2026-grupo-04"
+version = "0.1.0"
+description = "API de reseñas de películas (tipo IMDb) - ICINF1108 Desarrollo de Backend"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.16.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "psycopg2-binary>=2.9.9",
+    "python-dotenv>=1.0.1",
+    "sqlalchemy>=2.0.30",
+    "email-validator>=2.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.27.0",
+    "pytest>=8.0.0",
+]
