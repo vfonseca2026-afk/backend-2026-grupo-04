@@ -1,9 +1,5 @@
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 
-from app.seed import cargar_datos_iniciales
 from presentation.error_handlers import registrar_manejadores_de_errores
 from presentation.routers.genero_router import router as genero_router
 
@@ -17,24 +13,20 @@ from presentation.routers.usuario_router import router as usuario_router
 DESCRIPCION = """
 API REST para **reseñar películas** (estilo IMDb).
 
-Las personas aficionadas al cine registran películas por género y publican
-reseñas con puntuación de 1 a 10. Todos los errores controlados usan el mismo
-formato JSON: `{"error": {"code", "message", "details"}}`.
+El proyecto contempla un catálogo de películas y reseñas con puntuación
+de 1 a 10. Actualmente está disponible el CRUD de Géneros.
+
+Todos los errores controlados usan la estructura:
+`{"error": {"code": "...", "message": "...", "details": []}}`.
+
+Las tablas se preparan mediante migraciones y los datos iniciales se cargan
+explícitamente con `uv run python -m app.seed`.
 """
-
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    # Las tablas las crea Alembic (uv run alembic upgrade head).
-    cargar_datos_iniciales()
-    yield
-
 
 app = FastAPI(
     title="API de Reseñas de Películas",
     version="0.1.0",
     description=DESCRIPCION,
-    lifespan=lifespan,
 )
 
 registrar_manejadores_de_errores(app)
