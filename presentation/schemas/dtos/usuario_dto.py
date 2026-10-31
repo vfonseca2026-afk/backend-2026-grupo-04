@@ -1,12 +1,45 @@
-"""TODO(Matías) — DTO de Usuario.
+from datetime import datetime
 
-Patrón a copiar: el recorrido completo de Género (domain -> model -> mapper -> repository -> service -> DTO -> router).
-Archivo de referencia: presentation/schemas/dtos/genero_dto.py
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-  UsuarioCreateDTO : nombre_usuario (LONGITUD 3 a 50), email (FORMATO: EmailStr)
-  UsuarioUpdateDTO : lo anterior + activo: bool
-  UsuarioResponseDTO: id, nombre_usuario, email, activo, fecha_registro
-Usar extra="forbid" y un json_schema_extra con un ejemplo (lo pide OpenAPI).
-Para listar: response_model=PaginaDTO[UsuarioResponseDTO] (ver pagina_dto.py)
-y PaginacionQueryDTO para pagina/limite.
-"""
+
+class UsuarioCreateDTO(BaseModel):
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+        json_schema_extra={
+            "example": {
+                "nombre_usuario": "cinefilo",
+                "email": "cinefilo@example.com",
+            }
+        },
+    )
+
+    nombre_usuario: str = Field(min_length=3, max_length=50)
+    email: EmailStr = Field(max_length=254)
+
+
+class UsuarioUpdateDTO(UsuarioCreateDTO):
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        extra="forbid",
+        json_schema_extra={
+            "example": {
+                "nombre_usuario": "cinefilo",
+                "email": "cinefilo@example.com",
+                "activo": True,
+            }
+        },
+    )
+
+    activo: bool
+
+
+class UsuarioResponseDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    nombre_usuario: str
+    email: EmailStr
+    activo: bool
+    fecha_registro: datetime | None

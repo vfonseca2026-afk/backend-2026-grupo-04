@@ -9,8 +9,8 @@ from infrastructure.database import SessionLocal
 from infrastructure.repositories.genero_repository import GeneroRepository
 
 # --- Cada integrante agrega SUS imports y SU función en su bloque ---
-# TODO(Matías): imports de UsuarioService y UsuarioRepository
-
+from application.services.usuario_service import UsuarioService
+from infrastructure.repositories.usuario_repository import UsuarioRepository
 # TODO(Miguel): imports de PeliculaService y PeliculaRepository
 
 # TODO(Danna): imports de ResenaService y ResenaRepository
@@ -36,7 +36,8 @@ def get_genero_service(session: SessionDep) -> GeneroService:
     return GeneroService(GeneroRepository(session))
 
 
-# TODO(Matías): def get_usuario_service(session: SessionDep) -> UsuarioService
+def get_usuario_service(session: SessionDep) -> UsuarioService:
+    return UsuarioService(UsuarioRepository(session))
 
 # TODO(Miguel): def get_pelicula_service(session: SessionDep) -> PeliculaService
 #   (recibe PeliculaRepository y GeneroRepository)
