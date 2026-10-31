@@ -1,48 +1,201 @@
-# Backlog del equipo (copiar a GitHub Issues / Projects)
+# Backlog del grupo 04
 
-Regla: **una tarea = una rama = un pull request**, revisado por otra persona.
-Cada PR debe tener varios commits pequeños con mensajes que digan la acción realizada.
-Orden de integración recomendado para no bloquearse: primero `mapper + repositorio` de
-Usuario y Película (Reseña los necesita), luego servicio/DTO, luego router.
+## Organización del trabajo
 
-## Vicente Fonseca — Coordinación + Documentación e integración
-| Rama | Tarea |
-|---|---|
-| `chore/base-inicial` | Subir la base inicial mediante PR si el repositorio ya existe; activar y verificar protección de main |
-| `docs/roles-y-backlog` | Registrar roles en el README y crear los issues de este backlog |
-| `docs/openapi-ejemplos` | Revisar que cada endpoint tenga resumen, descripción, ejemplos y códigos (tags con descripción en `main.py`) |
-| `docs/readme-final` | Marcar ⏳ → ✅, completar capturas y recorrido de una solicitud con una película real |
-| `docs/diagramas` | Verificar diagramas de clases y de datos contra la implementación final |
-| (revisión) | Revisar y fusionar los PR de los demás; ensayar la defensa desde una copia limpia |
+Cada integrante trabaja en una rama principal y publica sus avances mediante
+commits significativos y push.
 
-## Matías Manquelaf — Dominio y datos
-| Rama | Tarea |
-|---|---|
-| `feature/usuarios-mapper-repo` | `usuario_mapper.py` + `usuario_repository.py` (publicar `obtener_por_id` cuanto antes) |
-| `feature/usuarios-servicio-dto` | `usuario_service.py` (email y nombre únicos) + `usuario_dto.py` (EmailStr) |
-| `feature/usuarios-router` | `usuario_router.py` (5 endpoints) + registrar en `main.py` y `dependencies.py` |
-| `feature/seeders-iniciales` | `usuario_seeder.py` y conectar todos los seeders en `app/seed.py` |
-| `feature/revision-modelo-datos` | Revisar modelos ORM y migración contra los diagramas (`uv run alembic check`) |
+No se exige un commit por archivo ni un PR por tarea o hito.
+El acuerdo es abrir un PR por integrante cuando su trabajo esté listo para
+integrarse, con revisión de otro compañero. Se podrán abrir PR adicionales
+si una dependencia lo requiere.
 
-## Miguel Torres — API y lógica de negocio
-| Rama | Tarea |
-|---|---|
-| `feature/peliculas-mapper-repo` | `pelicula_mapper.py` + `pelicula_repository.py` (publicar `obtener_por_id` cuanto antes) |
-| `feature/peliculas-servicio-dto` | `pelicula_service.py` (género existe) + `pelicula_dto.py` |
-| `feature/peliculas-filtro-paginacion` | `listar_filtrado` + `pelicula_query_dto.py`: filtrar → ordenar → paginar |
-| `feature/peliculas-router` | `pelicula_router.py` (5 endpoints) + registrar en `main.py` y `dependencies.py` |
-| `feature/peliculas-seeder` | `pelicula_seeder.py` (10+ películas, una con año futuro) |
+Cada integrante debe completar durante el proyecto:
+- Al menos cinco commits propios y significativos.
+- Trabajo en una rama distinta de main.
+- Al menos un pull request.
 
-## Danna Ramirez — Calidad y pruebas
-| Rama | Tarea |
-|---|---|
-| `feature/resenas-mapper-repo` | `resena_mapper.py` + `resena_repository.py` |
-| `feature/resenas-reglas-servicio` | `resena_service.py` con las reglas RN1, RN2, RN3 y existencia de usuario/película + `resena_dto.py` |
-| `feature/resenas-router` | `resena_router.py` (6 endpoints, incluye `/peliculas/{id}/resenas`) + registrar en `main.py` y `dependencies.py` |
-| `feature/resenas-seeder` | `resena_seeder.py` (10+ reseñas coherentes) |
-| `feature/pruebas-manuales` | Completar `tests_manual/pruebas.http` y `evidencias.md` (6+ casos con esperado/obtenido) |
+## Ramas y responsables
 
-## Todos
-- Cada integrante: al menos 5 commits propios, una rama distinta de `main` y 1 PR.
-- Antes de abrir un PR: `git pull origin main` en tu rama, resolver conflictos (los marcadores `TODO(nombre)` en `main.py`, `dependencies.py` y `seed.py` están separados para evitarlos) y probar con Swagger.
-- Defensa: todos deben poder explicar router → servicio → repositorio → base de datos de **cualquier** entidad.
+| Integrante | Rama | Responsabilidad principal |
+|---|---|---|
+| Vicente Fonseca | `feature/integracion-documentacion` | Coordinación, Géneros, documentación e integración |
+| Matías Manquelaf | `feature/usuarios` | Usuarios, dominio y datos |
+| Miguel Torres | `feature/peliculas` | Películas, API y consultas |
+| Danna Ramirez | `feature/resenas` | Reseñas, reglas de negocio y calidad |
+
+Las responsabilidades no son exclusivas: todos implementan, comprueban
+funcionalidades y participan en la integración y defensa.
+
+## Base inicial disponible
+
+Estos componentes ya estaban implementados antes de los avances posteriores:
+
+- Arquitectura de cuatro capas y recorrido completo de Géneros.
+- Cuatro entidades de dominio y cuatro modelos ORM.
+- Migración inicial de las cuatro tablas y sus relaciones.
+- Conexión a PostgreSQL y configuración Docker Compose.
+- CRUD, servicio, repositorio, mapper y DTO iniciales de Géneros.
+- Manejo central de errores uniformes.
+- Seeder de Géneros.
+- DTO comunes de paginación.
+- Pruebas locales y plantillas de pruebas manuales.
+
+La existencia de archivos con instrucciones TODO no significa que la
+funcionalidad esté implementada.
+
+## Vicente Fonseca
+
+Rama: `feature/integracion-documentacion`
+
+### Avances realizados
+
+- [x] Publicar la base inicial del proyecto.
+- [x] Completar ejemplos y descripciones OpenAPI de Géneros.
+- [x] Exigir descripcion y activo en el DTO de actualización de Géneros.
+- [x] Actualizar el README con el contrato y la organización del equipo.
+
+### Pendientes
+
+- [x] Actualizar este backlog y comprobar su coherencia con el README.
+- [x] Confirmar acceso de integrantes y docente al repositorio.
+- [x] Verificar protección de main contra pushes directos.
+- [x] Completar ejemplos específicos de errores en OpenAPI.
+- [ ] Revisar el contrato de las funcionalidades al integrarlas.
+- [ ] Verificar diagramas contra la implementación final.
+- [ ] Comprobar instalación y ejecución desde una copia limpia.
+- [ ] Consolidar README final y recorrido de una solicitud.
+- [ ] Coordinar revisión e integración de los PR.
+- [ ] Preparar presentación y coordinar ensayos de defensa.
+
+## Matías Manquelaf
+
+Rama: `feature/usuarios`
+
+Los avances actuales de esta rama deben confirmarse con Matías.
+Marcar las tareas conforme se comprueben, sin repetir trabajo ya realizado.
+
+- [ ] Implementar mapper y repositorio de Usuarios.
+- [ ] Publicar obtener_por_id para su uso en Reseñas.
+- [ ] Implementar DTO de creación, actualización y respuesta.
+- [ ] Validar formato de correo, longitudes y campos adicionales.
+- [ ] Implementar servicio y comprobación de correo y nombre únicos.
+- [ ] Permitir actualizar conservando los valores del propio usuario.
+- [ ] Implementar cinco endpoints de Usuarios.
+- [ ] Implementar listado paginado y sus metadatos.
+- [ ] Integrar dependencias y router de Usuarios.
+- [ ] Documentar operaciones y respuestas en OpenAPI.
+- [ ] Implementar seeder con usuarios activos e inactivos.
+- [ ] Coordinar el orden de carga inicial con los demás responsables.
+- [ ] Revisar coherencia entre modelos ORM, diagramas y migraciones.
+- [ ] Comprobar funcionamiento y persistencia de Usuarios.
+
+## Miguel Torres
+
+Rama: `feature/peliculas`
+
+Los avances actuales de esta rama deben confirmarse con Miguel.
+
+- [ ] Implementar mapper y repositorio de Películas.
+- [ ] Publicar obtener_por_id para su uso en Reseñas.
+- [ ] Implementar DTO de creación, actualización y respuesta.
+- [ ] Validar título, duración, año, clasificación y demás campos.
+- [ ] Implementar servicio y existencia del género relacionado.
+- [ ] Implementar cinco endpoints de Películas.
+- [ ] Integrar dependencias y router de Películas.
+- [ ] Implementar DTO de consulta.
+- [ ] Combinar filtro, orden y paginación en GET /peliculas.
+- [ ] Calcular total y total_paginas sobre los registros filtrados.
+- [ ] Usar columnas de orden permitidas y orden estable.
+- [ ] Documentar operaciones y respuestas en OpenAPI.
+- [ ] Implementar seeder con varias películas por género y una futura.
+- [ ] Comprobar funcionamiento y persistencia de Películas.
+
+## Danna Ramirez
+
+Rama: `feature/resenas`
+
+Los avances actuales de esta rama deben confirmarse con Danna.
+
+- [ ] Implementar DTO de creación, actualización y respuesta.
+- [ ] Validar puntuación, longitudes, IDs y campos adicionales.
+- [ ] Impedir cambiar usuario y película mediante el DTO de actualización.
+- [ ] Implementar mapper y repositorio de Reseñas.
+- [ ] Implementar servicio y comprobación de referencias existentes.
+- [ ] Rechazar reseñas de usuarios inactivos.
+- [ ] Rechazar reseñas de películas con año posterior al actual.
+- [ ] Rechazar reseñas duplicadas del mismo usuario y película.
+- [ ] Implementar cinco endpoints de Reseñas.
+- [ ] Implementar GET /peliculas/{pelicula_id}/resenas.
+- [ ] Implementar paginación de las colecciones previstas.
+- [ ] Integrar dependencias y router de Reseñas.
+- [ ] Documentar operaciones y respuestas en OpenAPI.
+- [ ] Implementar seeder con relaciones coherentes.
+- [ ] Comprobar funcionamiento y persistencia de Reseñas.
+- [ ] Coordinar las pruebas finales y sus evidencias con todo el equipo.
+
+## Dependencias e integración
+
+Reseñas necesita consultar Usuarios y Películas mediante:
+
+- UsuarioRepository.obtener_por_id(usuario_id)
+- PeliculaRepository.obtener_por_id(pelicula_id)
+
+Ambos métodos devolverán una entidad de dominio o None si no existe.
+
+Orden de integración recomendado:
+1. Usuarios.
+2. Películas.
+3. Reseñas.
+
+Vicente coordinará su PR de Géneros y documentación para evitar conflictos
+con los archivos compartidos.
+
+Antes de integrar cada PR:
+- Guardar y publicar los cambios de su rama.
+- Actualizar referencias con git fetch origin.
+- Incorporar origin/main mediante merge en su rama.
+- Resolver conflictos y comprobar el funcionamiento.
+- Solicitar revisión a otro integrante.
+
+Los archivos main.py, dependencies.py y app/seed.py requieren coordinación.
+Los bloques separados no garantizan ausencia de conflictos.
+
+## Migraciones y carga inicial
+
+- La migración inicial ya define las cuatro tablas.
+- Los cambios de esquema requieren una migración versionada.
+- Cada responsable implementa el seeder de su entidad.
+- Matías coordina la revisión del esquema y el orden de ejecución.
+- Orden de carga: Géneros, Usuarios, Películas y Reseñas.
+- La entrega requiere al menos dos registros por entidad y una relación
+  uno-a-muchos demostrable.
+- Los seeders deben usar referencias recuperadas de la base, sin asumir IDs fijos.
+
+## Pruebas y evidencias
+
+Durante los hitos se comprueba el funcionamiento de cada avance.
+
+Por acuerdo del equipo, el registro formal de evidencias se completará
+cuando las funcionalidades estén terminadas.
+
+En ese momento:
+- [ ] Completar tests_manual/pruebas.http.
+- [ ] Registrar entrada, esperado y obtenido en tests_manual/evidencias.md.
+- [ ] Cubrir CRUD, datos inválidos, recurso inexistente y regla de negocio.
+- [ ] Comprobar filtro, orden y paginación en una misma consulta.
+- [ ] Comprobar persistencia tras reiniciar, conservando el volumen.
+- [ ] Documentar cómo aislar o restablecer los datos de prueba.
+
+Cada integrante ejecutará y aportará resultados de su funcionalidad.
+Danna coordinará su consolidación.
+
+## Defensa
+
+- [ ] Preparar un máximo de 15 diapositivas.
+- [ ] Ensayar una presentación y demostración de 10 minutos.
+- [ ] Preparar respuestas para los 5 minutos de preguntas.
+- [ ] Demostrar cuatro endpoints distintos según la rúbrica.
+- [ ] Demostrar migraciones, seeders y persistencia tras reinicio.
+- [ ] Todos deben poder realizar la presentación completa.
+- [ ] Todos deben explicar el recorrido entre capas de cualquier entidad.
