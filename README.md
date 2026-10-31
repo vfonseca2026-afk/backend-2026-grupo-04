@@ -258,7 +258,21 @@ erDiagram
     }
 ```
 
-Restricción adicional: `UNIQUE (usuario_id, pelicula_id)` en `resenas` (una reseña por usuario y película).
+### Restricciones de integridad
+
+- `usuarios.nombre_usuario` y `usuarios.email` son únicos.
+- `generos.nombre` es único en la base. La comparación sin distinguir
+  mayúsculas se realiza en el servicio mediante el repositorio.
+- `UNIQUE (usuario_id, pelicula_id)` impide que un usuario registre
+  dos reseñas de la misma película.
+- La puntuación de una reseña debe estar entre 1 y 10.
+- La duración de una película debe ser mayor que cero.
+- La clasificación admite únicamente `TP`, `+14` y `+18`.
+- No se puede eliminar un género mientras tenga películas asociadas.
+- Eliminar un usuario o una película elimina sus reseñas asociadas.
+
+Estas restricciones describen los modelos previstos. Su aplicación en
+PostgreSQL depende de que las migraciones correspondientes estén aplicadas.
 
 ### Reglas de negocio
 
