@@ -15,13 +15,20 @@ class GeneroCreateDTO(BaseModel):
         },
     )
 
-    # Validación de LONGITUD: entre 2 y 50 caracteres.
-    nombre: str = Field(min_length=2, max_length=50)
-    descripcion: str = Field(default="", max_length=255)
+    nombre: str = Field(
+        min_length=2,
+        max_length=50,
+        description="Nombre único del género, sin distinguir mayúsculas.",
+    )
+    descripcion: str = Field(
+        default="",
+        max_length=255,
+        description="Descripción del género. Es opcional al crear.",
+    )
 
 
 class GeneroUpdateDTO(GeneroCreateDTO):
-    """Para actualizar (PUT) se envían todos los campos."""
+    """PUT requiere nombre, descripción y estado activo."""
 
     model_config = ConfigDict(
         str_strip_whitespace=True,
@@ -35,14 +42,22 @@ class GeneroUpdateDTO(GeneroCreateDTO):
         },
     )
 
-    activo: bool = True
+    descripcion: str = Field(
+        max_length=255,
+        description="Descripción que reemplazará la actual. Puede estar vacía.",
+    )
+    activo: bool = Field(
+        description="Indica si el género está activo.",
+    )
 
 
 class GeneroResponseDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    nombre: str
-    descripcion: str
-    activo: bool
-    fecha_creacion: datetime | None
+    id: int = Field(description="Identificador único del género.")
+    nombre: str = Field(description="Nombre del género.")
+    descripcion: str = Field(description="Descripción del género.")
+    activo: bool = Field(description="Estado del género.")
+    fecha_creacion: datetime | None = Field(
+        description="Fecha y hora de creación del género.",
+    )
