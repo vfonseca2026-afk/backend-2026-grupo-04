@@ -8,7 +8,7 @@ from presentation.error_handlers import registrar_manejadores_de_errores
 from presentation.routers.genero_router import router as genero_router
 
 # --- Cada integrante reemplaza SU línea cuando termine su router ---
-# TODO(Matías): from presentation.routers.usuario_router import router as usuario_router
+from presentation.routers.usuario_router import router as usuario_router
 
 # TODO(Miguel): from presentation.routers.pelicula_router import router as pelicula_router
 
@@ -41,7 +41,7 @@ registrar_manejadores_de_errores(app)
 
 app.include_router(genero_router)
 
-# TODO(Matías): app.include_router(usuario_router)
+app.include_router(usuario_router)
 
 # TODO(Miguel): app.include_router(pelicula_router)
 
