@@ -1,20 +1,59 @@
-"""TODO(Miguel) — Repositorio de Película.
+from sqlalchemy import func, select
+from sqlalchemy.orm import Session
 
-Patrón a copiar: el recorrido completo de Género (domain -> model -> mapper -> repository -> service -> DTO -> router).
-Archivo de referencia: infrastructure/repositories/genero_repository.py
+from domain.pelicula import Pelicula
+from infrastructure.mappers import pelicula_mapper
+from infrastructure.models.pelicula_model import PeliculaModel
 
-Métodos:
-  crear(pelicula) -> Pelicula
-  obtener_por_id(pelicula_id) -> Pelicula | None   <- LO USA ResenaService (Danna):
-                                                      publícalo en tu primer PR
-  listar_filtrado(genero_id, anio, clasificacion, titulo,
-                  ordenar_por, direccion, offset, limite) -> tuple[list[Pelicula], int]
-  actualizar(pelicula) -> Pelicula
-  eliminar(pelicula_id) -> bool
 
-listar_filtrado devuelve (items, total) y DEBE seguir este orden (guía 5.5):
-  1) FILTRAR con where() -> 2) calcular total sobre lo filtrado
-  3) ORDENAR con order_by() -> 4) PAGINAR con offset()/limit()
-Columnas permitidas para ordenar: titulo, anio_estreno, duracion_min
-(usar un diccionario nombre -> columna; nunca armar SQL con texto del usuario).
-"""
+class PeliculaRepository:
+    """Acceso persistente a películas mediante SQLAlchemy."""
+
+    def init(self, session: Session) -> None:
+        self.session = session
+
+    def crear(self, pelicula: Pelicula) -> Pelicula:
+        modelo = pelicula_mapper.a_modelo(pelicula)
+
+        self.session.add(modelo)
+        self.session.commit()
+        self.session.refresh(modelo)
+
+        return pelicula_mapper.a_dominio(modelo)
+
+    def obtener_por_id(self, pelicula_id: int) -> Pelicula | None:
+        modelo = self.session.get(PeliculaModel, pelicula_id)
+
+        if modelo is None:
+            return None
+
+        return pelicula_mapper.a_dominio(modelo)
+
+    def contar(self) -> int:
+        return self.session.scalar(
+            select(func.count()).select_from(PeliculaModel)
+        )
+
+    def actualizar(self, pelicula: Pelicula) -> Pelicula:
+        modelo = self.session.get(PeliculaModel, pelicula.id)
+
+        if modelo is None:
+            raise LookupError("La película no existe.")
+
+        pelicula_mapper.actualizar_modelo(modelo, pelicula)
+
+        self.session.commit()
+        self.session.refresh(modelo)
+
+        return pelicula_mapper.a_dominio(modelo)
+
+    def eliminar(self, pelicula_id: int) -> bool:
+        modelo = self.session.get(PeliculaModel, pelicula_id)
+
+        if modelo is None:
+            return False
+
+        self.session.delete(modelo)
+        self.session.commit()
+
+        return True

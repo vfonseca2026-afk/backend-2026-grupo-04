@@ -1,10 +1,41 @@
-"""TODO(Miguel) — Mapper de Película.
+from domain.pelicula import Clasificacion, Pelicula
+from infrastructure.models.pelicula_model import PeliculaModel
 
-Patrón a copiar: el recorrido completo de Género (domain -> model -> mapper -> repository -> service -> DTO -> router).
-Archivo de referencia: infrastructure/mappers/genero_mapper.py
 
-Funciones: a_dominio, a_modelo, actualizar_modelo.
-Ojo: en la BD "clasificacion" es str ("TP", "+14", "+18"); en el dominio es el
-Enum Clasificacion -> convertir con Clasificacion(modelo.clasificacion) y
-clasificacion.value.
-"""
+def a_dominio(modelo: PeliculaModel) -> Pelicula:
+    return Pelicula(
+        id=modelo.id,
+        titulo=modelo.titulo,
+        sinopsis=modelo.sinopsis,
+        anio_estreno=modelo.anio_estreno,
+        duracion_min=modelo.duracion_min,
+        director=modelo.director,
+        clasificacion=Clasificacion(modelo.clasificacion),
+        genero_id=modelo.genero_id,
+    )
+
+
+def a_modelo(pelicula: Pelicula) -> PeliculaModel:
+    return PeliculaModel(
+        id=pelicula.id,
+        titulo=pelicula.titulo,
+        sinopsis=pelicula.sinopsis,
+        anio_estreno=pelicula.anio_estreno,
+        duracion_min=pelicula.duracion_min,
+        director=pelicula.director,
+        clasificacion=pelicula.clasificacion.value,
+        genero_id=pelicula.genero_id,
+    )
+
+
+def actualizar_modelo(
+    modelo: PeliculaModel,
+    pelicula: Pelicula,
+) -> None:
+    modelo.titulo = pelicula.titulo
+    modelo.sinopsis = pelicula.sinopsis
+    modelo.anio_estreno = pelicula.anio_estreno
+    modelo.duracion_min = pelicula.duracion_min
+    modelo.director = pelicula.director
+    modelo.clasificacion = pelicula.clasificacion.value
+    modelo.genero_id = pelicula.genero_id
