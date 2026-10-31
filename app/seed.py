@@ -18,7 +18,9 @@ from infrastructure.database import SessionLocal
 from infrastructure.repositories.genero_repository import GeneroRepository
 from infrastructure.seeders.genero_seeder import seed_generos
 
-# TODO(Matías): coordinar imports de los seeders restantes.
+from application.services.usuario_service import UsuarioService
+from infrastructure.repositories.usuario_repository import UsuarioRepository
+from infrastructure.seeders.usuario_seeder import seed_usuarios
 
 
 def cargar_datos_iniciales() -> None:
@@ -32,7 +34,13 @@ def cargar_datos_iniciales() -> None:
         else:
             print("Carga de géneros omitida: la tabla ya contiene registros.")
 
-        # TODO(Matías): sembrar usuarios (si la tabla está vacía).
+        usuario_repository = UsuarioRepository(session)
+
+        if usuario_repository.contar() == 0:
+            seed_usuarios(UsuarioService(usuario_repository))
+            print("Usuarios iniciales cargados.")
+        else:
+            print("Carga de usuarios omitida: la tabla ya contiene registros.")
 
         # TODO(Miguel): integrar películas después de géneros.
 
