@@ -6,7 +6,7 @@ Proyecto grupal de **Desarrollo de Backend (ICINF1108)**. API REST, estilo IMDb,
 
 ## Problemática
 
-Quienes ven películas dejan sus opiniones repartidas en redes sociales y chats, sin una organización común por película y género. Esta API centraliza el catálogo y las reseñas: permite registrar películas y usuarios, publicar una única reseña por película y consultar el catálogo con filtros, orden y paginación.
+Quienes ven películas dejan sus opiniones repartidas en redes sociales y chats, sin una organización común por película y género. Esta API centraliza el catálogo y las reseñas: permite registrar películas y usuarios, publicar una única reseña por usuario y película y consultar el catálogo con filtros, orden y paginación.
 
 ---
 
@@ -18,6 +18,18 @@ Quienes ven películas dejan sus opiniones repartidas en redes sociales y chats,
 - Los archivos con `TODO` son tareas futuras, no endpoints funcionales. La tabla REST distingue el contrato previsto del disponible.
 - Esta base no satisface todavía los 12 endpoints ni los dos registros por cada entidad exigidos para la entrega.
 - El estreno se representa por año, no por fecha exacta. No hay autenticación, permisos, ranking ni frontend.
+
+## Problemática y alcance: P1–P7
+
+Las siguientes respuestas definen el escenario propuesto por el equipo; no representan resultados de una investigación de usuarios.
+
+- **P1. Situación:** las opiniones sobre películas quedan dispersas en chats y redes sociales, sin una organización común por título y género.
+- **P2. Actores:** personas aficionadas al cine que consultan y publican opiniones; personas encargadas de mantener el catálogo. Estos actores no implican permisos implementados.
+- **P3. Consecuencias:** dificultad para encontrar opiniones de una película y trabajo manual para mantener títulos y géneros consistentes.
+- **P4. Información:** géneros, usuarios, películas y reseñas, con los atributos y relaciones indicados en los diagramas.
+- **P5. Acciones previstas:** el sistema debe permitir crear géneros; consultar y mantener géneros; registrar usuarios; consultar y mantener usuarios; registrar películas con un género existente; consultar y mantener películas; filtrar, ordenar y paginar el catálogo; publicar una reseña por usuario y película; consultar y editar reseñas; eliminar reseñas; consultar reseñas de una película; recuperar cambios tras reiniciar. Solo Géneros está disponible en la base integrada descrita aquí.
+- **P6. Exclusiones:** frontend, autenticación/autorización, recomendaciones o ranking automático, integración con plataformas externas y moderación automática.
+- **P7. Aceptación prevista:** instalación desde copia limpia; cuatro entidades con ID y cuatro atributos útiles; al menos doce endpoints funcionales; CRUD persistente; rechazo de datos y referencias inválidas; tres reglas de negocio comprobables; filtro, orden y paginación en un mismo GET; seeders con al menos dos registros por entidad; pruebas reproducibles con esperado y obtenido. Estos objetivos no están todos completados.
 
 ## Usar con tu PostgreSQL existente en Docker
 
@@ -45,24 +57,29 @@ Aplica la migración sobre una base destinada a este proyecto; si ya tiene tabla
 
 Requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/), Git y Docker (o un PostgreSQL local).
 
-```bash
+```powershell
 # 1. Clonar e instalar dependencias
-git clone <URL_REAL_DEL_REPOSITORIO> backend-2026-grupo-04
+git clone https://github.com/vfonseca2026-afk/backend-2026-grupo-04.git
 cd backend-2026-grupo-04
 uv sync
 
 # 2. Solo si aún NO tienes un .env configurado
-cp .env.example .env          # en PowerShell: Copy-Item .env.example .env
+Copy-Item .env.example .env  # PowerShell; en bash: cp .env.example .env
 # Si ya tienes un .env conectado a Docker, CONSÉRVALO y omite esta copia.
 #    edita .env y cambia DB_PASSWORD
 
 # 3. Base de datos PostgreSQL (con Docker)
 docker compose up -d
+docker compose ps
+# Esperar a que el servicio db esté healthy.
 
 # 4. Migraciones (crea las tablas desde cero)
 uv run alembic upgrade head
 
-# 5. Iniciar la API (al arrancar, los seeders cargan datos de ejemplo si la base está vacía)
+# 5. Cargar los géneros iniciales (los otros seeders están pendientes)
+uv run python -m app.seed
+
+# 6. Iniciar la API
 uv run uvicorn app.main:app --reload
 ```
 
@@ -78,7 +95,7 @@ uv run uvicorn app.main:app --reload
 
 | Variable | Ejemplo | Descripción |
 |---|---|---|
-| `DB_HOST` | `localhost` | Servidor de la base |
+| `DB_HOST` | `127.0.0.1` | Servidor de la base |
 | `DB_PORT` | `5432` | Puerto publicado de PostgreSQL |
 | `DB_NAME` | `cine_resenas` | Nombre de la base |
 | `DB_USER` | `cine` | Usuario |
@@ -87,8 +104,9 @@ uv run uvicorn app.main:app --reload
 ### Migraciones y seeders
 
 - **Migraciones:** `migrations/versions/0001_crear_tablas.py` crea `generos`, `usuarios`, `peliculas` y `resenas` desde cero. Se aplican con `uv run alembic upgrade head` y se revierten con `uv run alembic downgrade base`.
-- **Seeders:** cargan datos de ejemplo coherentes (con relaciones 1:N). Se ejecutan al iniciar la API y a mano con `uv run python -m app.seed`. Cada entidad se siembra solo si su tabla está vacía, por lo que no agregan duplicados en una tabla ya poblada. No reparan cargas parciales.
-- **Reiniciar todo desde cero:** `docker compose down -v && docker compose up -d`, luego migraciones y API.
+- **Seeder disponible:** Géneros. Se ejecuta al iniciar la API si la tabla está vacía y mediante `uv run python -m app.seed`. No duplica datos en una tabla ya poblada ni repara cargas parciales. Los seeders de Usuarios, Películas y Reseñas, y la demostración de relaciones con datos iniciales, están pendientes.
+- **Reiniciar sin borrar datos:** `docker compose restart db`. Para reiniciar solo la API, detener Uvicorn con Ctrl+C y volver a iniciarlo. No eliminar el volumen para comprobar persistencia.
+- **Restablecimiento destructivo:** `docker compose down -v` elimina el volumen y sus datos. Reservar su uso para una base de pruebas descartable; después hay que levantar PostgreSQL, aplicar migraciones y ejecutar la carga inicial.
 - **Persistencia:** los datos viven en el volumen `pgdata_resenas`; sobreviven al reinicio de la API y del contenedor.
 
 ---
@@ -157,10 +175,41 @@ Los errores viajan como excepciones de dominio (`RecursoNoEncontradoError`, `Con
 
 ```mermaid
 classDiagram
-    class Genero { id; nombre; descripcion; activo; fecha_creacion }
-    class Pelicula { id; titulo; sinopsis; anio_estreno; duracion_min; director; clasificacion; genero_id; esta_estrenada() }
-    class Usuario { id; nombre_usuario; email; activo; fecha_registro; puede_resenar() }
-    class Resena { id; usuario_id; pelicula_id; puntuacion; titulo; comentario; fecha }
+    class Genero {
+        id
+        nombre
+        descripcion
+        activo
+        fecha_creacion
+    }
+    class Pelicula {
+        id
+        titulo
+        sinopsis
+        anio_estreno
+        duracion_min
+        director
+        clasificacion
+        genero_id
+        esta_estrenada()
+    }
+    class Usuario {
+        id
+        nombre_usuario
+        email
+        activo
+        fecha_registro
+        puede_resenar()
+    }
+    class Resena {
+        id
+        usuario_id
+        pelicula_id
+        puntuacion
+        titulo
+        comentario
+        fecha
+    }
     Genero "1" --> "0..*" Pelicula : tiene
     Pelicula "1" --> "0..*" Resena : recibe
     Usuario "1" --> "0..*" Resena : escribe
@@ -173,10 +222,39 @@ erDiagram
     GENEROS ||--o{ PELICULAS : "genero_id (RESTRICT)"
     PELICULAS ||--o{ RESENAS : "pelicula_id (CASCADE)"
     USUARIOS ||--o{ RESENAS : "usuario_id (CASCADE)"
-    GENEROS { int id PK  string nombre UK  string descripcion  bool activo  datetime fecha_creacion }
-    PELICULAS { int id PK  string titulo  text sinopsis  int anio_estreno  int duracion_min  string director  string clasificacion  int genero_id FK }
-    USUARIOS { int id PK  string nombre_usuario UK  string email UK  bool activo  datetime fecha_registro }
-    RESENAS { int id PK  int usuario_id FK  int pelicula_id FK  int puntuacion  string titulo  text comentario  datetime fecha }
+    GENEROS {
+        int id PK
+        string nombre UK
+        string descripcion
+        bool activo
+        datetime fecha_creacion
+    }
+    PELICULAS {
+        int id PK
+        string titulo
+        text sinopsis
+        int anio_estreno
+        int duracion_min
+        string director
+        string clasificacion
+        int genero_id FK
+    }
+    USUARIOS {
+        int id PK
+        string nombre_usuario UK
+        string email UK
+        bool activo
+        datetime fecha_registro
+    }
+    RESENAS {
+        int id PK
+        int usuario_id FK
+        int pelicula_id FK
+        int puntuacion
+        string titulo
+        text comentario
+        datetime fecha
+    }
 ```
 
 Restricción adicional: `UNIQUE (usuario_id, pelicula_id)` en `resenas` (una reseña por usuario y película).
@@ -231,16 +309,37 @@ Documentado en Swagger (`/docs`). Todas las colecciones usan sustantivos en plur
 | DELETE | `/resenas/{resena_id}` | Eliminar reseña | 204 | 404 | ⏳ |
 | GET | `/peliculas/{pelicula_id}/resenas` | Reseñas de una película | 200 | 404 | ⏳ |
 
-### Filtro, orden y paginación (`GET /peliculas`)
+### Contrato disponible de Géneros
+
+- **POST:** `nombre` obligatorio (2–50 caracteres); `descripcion` opcional (máximo 255, predeterminado vacío). Los textos se recortan y los campos adicionales se rechazan.
+- **GET de colección:** `solo_activos=false` devuelve todos; `solo_activos=true` excluye inactivos. La lista se ordena por nombre. Este endpoint no implementa paginación.
+- **GET por ID:** exige un entero positivo; devuelve 404 si no existe.
+- **PUT:** exige `nombre`, `descripcion` y `activo`. La descripción puede estar vacía. Conserva ID y fecha de creación. Omitir un campo obligatorio produce 422.
+- **DELETE:** devuelve 204 sin cuerpo; un género con películas asociadas produce 409.
+- Los nombres duplicados se comprueban sin distinguir mayúsculas mediante el servicio y el repositorio. Se permite actualizar un registro conservando su propio nombre. La unicidad sin distinguir mayúsculas ante concurrencia no está garantizada por un índice específico de PostgreSQL en esta versión.
+- Router y DTO contienen descripciones y ejemplos OpenAPI. Los ejemplos son ilustrativos y no constituyen resultados de ejecución.
+
+Ejemplo de PUT sobre un ID existente:
+
+```json
+{
+  "nombre": "Drama",
+  "descripcion": "Historias centradas en personajes.",
+  "activo": true
+}
+```
+
+### Filtro, orden y paginación (`GET /peliculas`, pendiente)
+
 
 ```text
 GET /peliculas?genero_id=2&anio=2010&ordenar_por=titulo&direccion=asc&pagina=1&limite=10
 ```
 
-Se aplica en este orden: **filtrar → ordenar → paginar**. Respuesta:
+Contrato previsto: **filtrar → ordenar → paginar**. El total se calcula sobre los registros filtrados. Ejemplo para una consulta sin coincidencias:
 
 ```json
-{ "items": [], "total": 85, "pagina": 1, "limite": 10, "total_paginas": 9 }
+{ "items": [], "total": 0, "pagina": 1, "limite": 10, "total_paginas": 0 }
 ```
 
 ### Formato uniforme de errores
@@ -260,7 +359,11 @@ Se aplica en este orden: **filtrar → ordenar → paginar**. Respuesta:
 
 ## Pruebas
 
-Casos reproducibles en `tests_manual/pruebas.http` (extensión *REST Client* de VS Code o Thunder Client) y su registro de esperado/obtenido en `tests_manual/evidencias.md`. Para restablecer los datos de prueba: `docker compose down -v`, `docker compose up -d`, migraciones y API.
+Durante el desarrollo se comprueba cada funcionalidad sin registrar todavía las evidencias formales, por acuerdo del equipo. Al terminar el proyecto se completarán las solicitudes de `tests_manual/pruebas.http` y los resultados de `tests_manual/evidencias.md`.
+
+La entrega debe incluir al menos seis casos reproducibles con preparación, entrada, resultado esperado y resultado obtenido, cubriendo CRUD, datos inválidos, recurso inexistente, regla de negocio, consulta con filtro/orden/paginación y persistencia. No se considera completada una evidencia hasta ejecutar el caso y registrar su resultado real.
+
+Las pruebas de persistencia deben conservar el volumen. El procedimiento de aislamiento o restablecimiento de los datos de prueba se documentará junto con las evidencias.
 
 ---
 
@@ -268,7 +371,7 @@ Casos reproducibles en `tests_manual/pruebas.http` (extensión *REST Client* de 
 
 | Integrante | Área de responsabilidad | Foco técnico |
 |---|---|---|
-| Vicente Fonseca (jefe de grupo) | Coordinación y seguimiento + Documentación e integración | Backlog, README, OpenAPI, diagramas, integración de PR |
+| Vicente Fonseca (jefe de grupo) | Coordinación y seguimiento + Documentación e integración | Géneros, backlog, README, OpenAPI, diagramas e integración de PR |
 | Matías Manquelaf | Dominio y datos | Usuarios, modelo persistente, migración, seeders |
 | Miguel Torres | API y lógica de negocio | Películas, filtro/orden/paginación |
 | Danna Ramirez | Calidad y pruebas | Reseñas y reglas de negocio, pruebas y evidencias |
@@ -277,10 +380,21 @@ Las áreas indican seguimiento principal, no tareas exclusivas: todos participan
 
 ## Flujo de trabajo con Git
 
-- Flujo acordado: cambios por *pull request* con revisión de otra persona. El jefe debe activar y verificar la protección de `main` en GitHub.
-- Una rama por tarea: `feature/<tarea>` (por ejemplo `feature/usuarios-repositorio`).
-- Commits pequeños que indican la acción (por ejemplo «Agrega regla de reseña única por usuario»).
-- El `.env` nunca se sube; solo `.env.example`.
+| Integrante | Rama de trabajo |
+|---|---|
+| Vicente Fonseca | `feature/integracion-documentacion` |
+| Matías Manquelaf | `feature/usuarios` |
+| Miguel Torres | `feature/peliculas` |
+| Danna Ramirez | `feature/resenas` |
+
+- Cada integrante hace commits significativos y publica avances en su rama durante los hitos.
+- Acuerdo del equipo: abrir un PR por integrante cuando su trabajo esté listo. No se exige un PR por commit ni por hito.
+- Antes de integrar: actualizar la rama con `main`, resolver conflictos y comprobar funcionamiento.
+- Orden de integración de dependencias: Usuarios, Películas y luego Reseñas. Vicente coordina su PR de Géneros, documentación e integración.
+- Si una dependencia necesita integrarse antes, se podrá abrir un PR adicional; la rúbrica exige al menos uno, no un máximo de uno.
+- Los PR requieren revisión de otra persona. La protección de `main` debe configurarse y comprobarse en GitHub; este documento no acredita su activación.
+- Cada integrante debe completar al menos cinco commits propios y significativos, una rama distinta de `main` y un PR.
+- `.env` y `.venv` no se suben; solo se comparte `.env.example` sin credenciales reales.
 
 
 ## Verificación de la versión inicial
