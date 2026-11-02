@@ -11,8 +11,10 @@ from infrastructure.database import SessionLocal
 from infrastructure.repositories.genero_repository import GeneroRepository
 from infrastructure.repositories.pelicula_repository import PeliculaRepository
 from infrastructure.repositories.usuario_repository import UsuarioRepository
+from application.services.resena_service import ResenaService
+from infrastructure.repositories.resena_repository import ResenaRepository
 
-#TODO(Danna): imports de ResenaService y ResenaRepository.
+
 
 def get_session() -> Iterator[Session]:
     """Abre una sesión por solicitud y la cierra al terminar."""
@@ -44,6 +46,9 @@ def get_pelicula_service(session: SessionDep) -> PeliculaService:
         genero_repository=GeneroRepository(session),
     )
 
-
-# TODO(Danna): def get_resena_service(session: SessionDep) -> ResenaService
-# ------(recibe ResenaRepository, UsuarioRepository y PeliculaRepository).
+def get_resena_service(session: SessionDep) -> ResenaService:
+    return ResenaService(
+        repository=ResenaRepository(session),
+        usuario_repository=UsuarioRepository(session),
+        pelicula_repository=PeliculaRepository(session),
+    )
