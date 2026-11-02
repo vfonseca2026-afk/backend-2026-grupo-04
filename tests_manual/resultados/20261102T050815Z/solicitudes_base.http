@@ -1,0 +1,596 @@
+### Pruebas manuales — Grupo 04
+# Cliente: extensión REST Client de VS Code (humao.rest-client).
+# Abrir este archivo en VS Code y usar Send Request en cada bloque.
+# Ejecutar EN ORDEN, una solicitud a la vez; detenerse si la preparación falla.
+# Las referencias nombre.response.body.$.id recuperan IDs reales de respuestas.
+# Esta sintaxis es específica de REST Client; otros clientes requieren adaptar variables.
+# Requisitos: base exclusiva preparada como indica evidencias.md y API en 8001.
+# No ejecutar contra la base de trabajo.
+# T01/T02: migraciones, seeders, conteos y repetición se verifican primero en terminal.
+# T27: ejecutar unittest por separado. Este archivo no registra resultados automáticamente.
+# Guardar respuestas reales para completar Obtenido en evidencias.md.
+# Usar una base nueva al repetir todo; las solicitudes destructivas eliminan solo registros QA.
+
+@baseUrl = http://127.0.0.1:8001
+@run = 20261102a
+# Mantener mayor que el año actual; no es una fecha exacta de estreno.
+@anioFuturo = 2099
+
+
+### T02. Consultar géneros iniciales — 200
+GET {{baseUrl}}/generos
+
+### T02. Consultar usuarios iniciales — 200, total esperado 6 en base recién sembrada
+GET {{baseUrl}}/usuarios?pagina=1&limite=100
+
+### T02. Consultar películas iniciales — 200, total esperado 10
+GET {{baseUrl}}/peliculas?pagina=1&limite=100
+
+### T02. Consultar reseñas iniciales — 200, total esperado 10
+GET {{baseUrl}}/resenas?pagina=1&limite=100
+
+### T03. Crear género exclusivo QA — 201
+# @name crearGeneroQA
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nombre": "QA Genero {{run}}",
+  "descripcion": "Datos exclusivos de pruebas"
+}
+
+### T03. Listar géneros — 200, incluye QA
+GET {{baseUrl}}/generos
+
+### T03. Obtener género QA — 200
+GET {{baseUrl}}/generos/{{crearGeneroQA.response.body.$.id}}
+
+### T04. Actualizar género QA — 200
+PUT {{baseUrl}}/generos/{{crearGeneroQA.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre": "QA Genero {{run}}",
+  "descripcion": "Descripcion QA modificada",
+  "activo": true
+}
+
+### T04. Confirmar modificación e ID/fecha conservados — 200
+GET {{baseUrl}}/generos/{{crearGeneroQA.response.body.$.id}}
+
+### T05. Nombre corto — 422 VALIDATION_ERROR
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nombre": "A"
+}
+
+### T05. PUT omite activo — 422
+PUT {{baseUrl}}/generos/{{crearGeneroQA.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre": "QA Genero {{run}}",
+  "descripcion": "Cambio no valido"
+}
+
+### T05. ID cero — 422
+GET {{baseUrl}}/generos/0
+
+### T06. Género duplicado con mayúsculas — 409
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nombre": "QA GENERO {{run}}",
+  "descripcion": "Duplicado"
+}
+
+### T07. Crear usuario activo QA — 201
+# @name crearUsuarioQA
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_activo_{{run}}",
+  "email": "qa.activo.{{run}}@example.com"
+}
+
+### T07. Consultar usuario — 200
+GET {{baseUrl}}/usuarios/{{crearUsuarioQA.response.body.$.id}}
+
+### T07. Actualizar conservando correo y nombre — 200
+PUT {{baseUrl}}/usuarios/{{crearUsuarioQA.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_activo_{{run}}",
+  "email": "qa.activo.{{run}}@example.com",
+  "activo": true
+}
+
+### T07. Listado paginado — 200
+GET {{baseUrl}}/usuarios?pagina=1&limite=1
+
+### Preparación T18. Crear segundo usuario — 201
+# @name crearUsuarioInactivo
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_inactivo_{{run}}",
+  "email": "qa.inactivo.{{run}}@example.com"
+}
+
+### Preparación T18. Desactivar usuario — 200
+PUT {{baseUrl}}/usuarios/{{crearUsuarioInactivo.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_inactivo_{{run}}",
+  "email": "qa.inactivo.{{run}}@example.com",
+  "activo": false
+}
+
+### T08. Correo inválido — 422
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_email_malo_{{run}}",
+  "email": "correo-invalido"
+}
+
+### T08. Correo repetido — 409
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_otro_{{run}}",
+  "email": "qa.activo.{{run}}@example.com"
+}
+
+### T09. Crear QA Alfa — 201
+# @name crearAlfa
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Alfa",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 80,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T09. Crear QA Beta — 201
+# @name crearBeta
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Beta",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 120,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T09. Crear QA Gamma — 201
+# @name crearGamma
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Gamma",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2021,
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T09. Consultar Alfa — 200
+GET {{baseUrl}}/peliculas/{{crearAlfa.response.body.$.id}}
+
+### T09. Actualizar Gamma conservando año y duración — 200
+PUT {{baseUrl}}/peliculas/{{crearGamma.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "titulo": "QA Gamma",
+  "sinopsis": "Sinopsis modificada para verificar actualizacion",
+  "anio_estreno": 2021,
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T09. Confirmar Gamma — 200
+GET {{baseUrl}}/peliculas/{{crearGamma.response.body.$.id}}
+
+### Preparación T10. Crear género sin películas — 201
+# @name crearGeneroBorrable
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nombre": "QA Borrable {{run}}",
+  "descripcion": "Temporal"
+}
+
+### Preparación T10. Eliminar género temporal — 204 sin cuerpo
+DELETE {{baseUrl}}/generos/{{crearGeneroBorrable.response.body.$.id}}
+
+### T10. Película con género eliminado — 404
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Referencia inexistente",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroBorrable.response.body.$.id}}
+}
+
+### T11. Duración cero — 422
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Duracion invalida",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 0,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T11. Clasificación inválida — 422
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Clasificacion invalida",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "INVALIDA",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T12. Consulta combinada, página 1 — 200, duraciones [120,100]; total=3, total_paginas=2
+GET {{baseUrl}}/peliculas?genero_id={{crearGeneroQA.response.body.$.id}}&ordenar_por=duracion_min&direccion=desc&pagina=1&limite=2
+
+### T13. Consulta combinada, página 2 — 200, duraciones [80]; total=3, total_paginas=2
+GET {{baseUrl}}/peliculas?genero_id={{crearGeneroQA.response.body.$.id}}&ordenar_por=duracion_min&direccion=desc&pagina=2&limite=2
+
+### T13. Consulta combinada, página 3 — 200, duraciones []; total=3, total_paginas=2
+GET {{baseUrl}}/peliculas?genero_id={{crearGeneroQA.response.body.$.id}}&ordenar_por=duracion_min&direccion=desc&pagina=3&limite=2
+
+### T14. Sin coincidencias — 200, items=[], total=0, total_paginas=0
+GET {{baseUrl}}/peliculas?genero_id={{crearGeneroQA.response.body.$.id}}&titulo=texto_sin_coincidencias_{{run}}&pagina=1&limite=2
+
+### T14. Parámetro inválido pagina=0 — 422
+GET {{baseUrl}}/peliculas?pagina=0
+
+### T14. Parámetro inválido limite=101 — 422
+GET {{baseUrl}}/peliculas?limite=101
+
+### T14. Parámetro inválido direccion=arriba — 422
+GET {{baseUrl}}/peliculas?direccion=arriba
+
+### T15. Eliminar género con películas — 409
+DELETE {{baseUrl}}/generos/{{crearGeneroQA.response.body.$.id}}
+
+### T15. Género sigue disponible — 200
+GET {{baseUrl}}/generos/{{crearGeneroQA.response.body.$.id}}
+
+### T15. Película sigue disponible — 200
+GET {{baseUrl}}/peliculas/{{crearAlfa.response.body.$.id}}
+
+### Preparación T18. Género separado para película futura — 201
+# @name crearGeneroFuturo
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nombre": "QA Futuro {{run}}",
+  "descripcion": "Separado del filtro de tres peliculas"
+}
+
+### Preparación T18. Película futura — 201
+# @name crearFutura
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Pelicula futura",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": {{anioFuturo}},
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroFuturo.response.body.$.id}}
+}
+
+### T16. Crear reseña QA — 201
+# @name crearResenaQA
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioQA.response.body.$.id}},
+  "pelicula_id": {{crearAlfa.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T16. Obtener reseña — 200
+GET {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+
+### T16. Listar filtrando pareja QA — 200, total=1
+GET {{baseUrl}}/resenas?usuario_id={{crearUsuarioQA.response.body.$.id}}&pelicula_id={{crearAlfa.response.body.$.id}}&pagina=1&limite=10
+
+### T16. Reseñas de Alfa — 200, incluye QA
+GET {{baseUrl}}/peliculas/{{crearAlfa.response.body.$.id}}/resenas?pagina=1&limite=10
+
+### T17. Reseña duplicada — 409
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioQA.response.body.$.id}},
+  "pelicula_id": {{crearAlfa.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T17. Confirmar que no se duplicó — 200, total=1
+GET {{baseUrl}}/resenas?usuario_id={{crearUsuarioQA.response.body.$.id}}&pelicula_id={{crearAlfa.response.body.$.id}}
+
+### T18. Usuario inactivo — 400
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioInactivo.response.body.$.id}},
+  "pelicula_id": {{crearAlfa.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T18. Película futura — 400
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioQA.response.body.$.id}},
+  "pelicula_id": {{crearFutura.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T19. Puntuación 11 — 422
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioQA.response.body.$.id}},
+  "pelicula_id": {{crearAlfa.response.body.$.id}},
+  "puntuacion": 11,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T19. Comentario corto — 422
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioQA.response.body.$.id}},
+  "pelicula_id": {{crearAlfa.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Corto"
+}
+
+### T19. PUT intenta cambiar usuario — 422
+PUT {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "puntuacion": 9,
+  "titulo": "Actualizada",
+  "comentario": "Comentario actualizado suficientemente largo.",
+  "usuario_id": {{crearUsuarioQA.response.body.$.id}}
+}
+
+### T20. Actualizar reseña — 200; conservar referencias y fecha
+PUT {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "puntuacion": 9,
+  "titulo": "Opinion QA modificada",
+  "comentario": "Comentario modificado para comprobar persistencia."
+}
+
+### T20. Consultar modificación — 200
+GET {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+
+### T21. PAUSA: reiniciar SOLO la API en la misma terminal de pruebas
+# Ctrl+C y uv run uvicorn app.main:app --reload --port 8001
+# Confirmar DB_NAME de pruebas. Conservar esta ventana de REST Client y sus respuestas.
+# Después ejecutar la siguiente solicitud; se espera puntuacion=9 y título modificado.
+
+
+### T21a. Consultar después de reiniciar API — 200, datos conservados
+GET {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+
+### T21. PAUSA: detener API y reiniciar PostgreSQL conservando el volumen
+# En terminal del proyecto dueño del contenedor: docker compose restart db
+# Esperar healthy con docker compose ps. No usar down -v.
+# Arrancar API en la terminal que conserva DB_NAME de pruebas, puerto 8001.
+
+
+### T21b. Consultar después de reiniciar PostgreSQL y API — 200, datos conservados
+GET {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+
+### T22. Eliminar reseña QA — 204 sin cuerpo
+DELETE {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+
+### T22. Recurso eliminado — 404
+GET {{baseUrl}}/resenas/{{crearResenaQA.response.body.$.id}}
+
+### T23. Crear usuario temporal — 201
+# @name crearUsuarioCascadaUsuario
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_cascada_usuario_{{run}}",
+  "email": "qa.cascada.usuario.{{run}}@example.com"
+}
+
+### T23. Crear película temporal — 201
+# @name crearPeliculaCascadaUsuario
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Cascada Usuario",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T23. Crear reseña relacionada — 201
+# @name crearResenaCascadaUsuario
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioCascadaUsuario.response.body.$.id}},
+  "pelicula_id": {{crearPeliculaCascadaUsuario.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T23. Eliminar usuario — 204
+DELETE {{baseUrl}}/usuarios/{{crearUsuarioCascadaUsuario.response.body.$.id}}
+
+### T23. Reseña eliminada por cascada — 404
+GET {{baseUrl}}/resenas/{{crearResenaCascadaUsuario.response.body.$.id}}
+
+### T23. Película sigue disponible — 200
+GET {{baseUrl}}/peliculas/{{crearPeliculaCascadaUsuario.response.body.$.id}}
+
+### T24. Crear usuario temporal — 201
+# @name crearUsuarioCascadaPelicula
+POST {{baseUrl}}/usuarios
+Content-Type: application/json
+
+{
+  "nombre_usuario": "qa_cascada_pelicula_{{run}}",
+  "email": "qa.cascada.pelicula.{{run}}@example.com"
+}
+
+### T24. Crear película temporal — 201
+# @name crearPeliculaCascadaPelicula
+POST {{baseUrl}}/peliculas
+Content-Type: application/json
+
+{
+  "titulo": "QA Cascada Pelicula",
+  "sinopsis": "Pelicula ficticia de pruebas",
+  "anio_estreno": 2020,
+  "duracion_min": 100,
+  "director": "Director QA",
+  "clasificacion": "TP",
+  "genero_id": {{crearGeneroQA.response.body.$.id}}
+}
+
+### T24. Crear reseña relacionada — 201
+# @name crearResenaCascadaPelicula
+POST {{baseUrl}}/resenas
+Content-Type: application/json
+
+{
+  "usuario_id": {{crearUsuarioCascadaPelicula.response.body.$.id}},
+  "pelicula_id": {{crearPeliculaCascadaPelicula.response.body.$.id}},
+  "puntuacion": 8,
+  "titulo": "Opinion QA",
+  "comentario": "Comentario suficiente para verificar la API."
+}
+
+### T24. Eliminar película — 204
+DELETE {{baseUrl}}/peliculas/{{crearPeliculaCascadaPelicula.response.body.$.id}}
+
+### T24. Reseña eliminada por cascada — 404
+GET {{baseUrl}}/resenas/{{crearResenaCascadaPelicula.response.body.$.id}}
+
+### T24. Usuario sigue disponible — 200
+GET {{baseUrl}}/usuarios/{{crearUsuarioCascadaPelicula.response.body.$.id}}
+
+### T25. Crear género para CRUD completo — 201
+# @name crearGeneroCiclo
+POST {{baseUrl}}/generos
+Content-Type: application/json
+
+{
+  "nombre": "QA Ciclo {{run}}",
+  "descripcion": "Inicio"
+}
+
+### T25. Listar e identificar género del ciclo — 200
+GET {{baseUrl}}/generos
+
+### T25. Obtener género del ciclo — 200
+GET {{baseUrl}}/generos/{{crearGeneroCiclo.response.body.$.id}}
+
+### T25. Actualizar género del ciclo — 200
+PUT {{baseUrl}}/generos/{{crearGeneroCiclo.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre": "QA Ciclo modificado {{run}}",
+  "descripcion": "Actualizado",
+  "activo": false
+}
+
+### T25. Eliminar género del ciclo — 204 sin cuerpo
+DELETE {{baseUrl}}/generos/{{crearGeneroCiclo.response.body.$.id}}
+
+### T25. Obtener después de eliminar — 404
+GET {{baseUrl}}/generos/{{crearGeneroCiclo.response.body.$.id}}
+
+### T26. Reseñas de película eliminada en T24 — 404
+GET {{baseUrl}}/peliculas/{{crearPeliculaCascadaPelicula.response.body.$.id}}/resenas
+
+### Fin
+# T27 en terminal: uv run python -m unittest discover -s tests -v
+# Registrar resultados reales en evidencias.md. No hay limpieza global automática.
+# Para repetir la suite: base nueva, nuevo run y ejecutar de nuevo todas las creaciones.
+# No volver a enviar una creación ya usada durante esta corrida: cambiaría su ID referenciado.
+
