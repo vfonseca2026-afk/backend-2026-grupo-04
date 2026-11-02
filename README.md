@@ -2,7 +2,7 @@
 
 Proyecto grupal de **Desarrollo de Backend (ICINF1108)**. API REST, estilo IMDb, donde las personas aficionadas al cine consultan un catálogo de películas organizado por género y publican reseñas con puntuación de 1 a 10.
 
-> **Estado funcional:** implementados los CRUD de Géneros, Usuarios, Películas y Reseñas, con 21 operaciones OpenAPI, consulta combinada de Películas y carga inicial explícita de las cuatro entidades. La prueba del contrato ampliado y las otras seis pruebas locales aprobaron según la ejecución del equipo. Quedan pendientes las verificaciones finales HTTP, cascadas, carga completa desde cero, persistencia y evidencias. La disponibilidad en `main` depende de fusionar el PR de Reseñas; para ejecutar antes del merge, usar `feature/resenas`.
+> **Estado:** las cuatro entidades están implementadas e integradas en `main`, con 21 operaciones OpenAPI y cuatro seeders explícitos. Hay evidencias de 80 solicitudes HTTP con los códigos esperados y siete pruebas automatizadas aprobadas.
 
 ## Problemática
 
@@ -16,7 +16,7 @@ Quienes ven películas dejan sus opiniones repartidas en redes sociales y chats,
 - Películas permite combinar filtros, orden y paginación sobre PostgreSQL en un mismo GET.
 - Persistencia: cuatro modelos ORM y migración inicial con sus relaciones y restricciones.
 - Carga inicial explícita disponible para Géneros, Usuarios, Películas y Reseñas, en ese orden.
-- Pendiente: comprobar las cuatro cargas desde una base vacía, cascadas y persistencia; completar pruebas HTTP, evidencias, revisión final y defensa.
+- Cierre pendiente: completar los cuatro ejemplos explícitos de respuestas exitosas de Usuarios, rellenar la tabla de IDs QA de evidencias y preparar/verificar la presentación y los ensayos. Las migraciones, la carga inicial, las consultas HTTP, las cascadas y la persistencia tienen respaldo en las evidencias disponibles.
 - Contrato implementado: 21 operaciones, cinco CRUD por entidad y una consulta paginada de reseñas por película.
 - Los archivos con TODO representan trabajo pendiente; las tablas existentes no equivalen a endpoints implementados.
 - El estreno se representa por año, no por fecha exacta. No hay autenticación, permisos, ranking ni frontend.
@@ -58,7 +58,7 @@ Aplica la migración sobre una base destinada a este proyecto; si ya tiene tabla
 
 ## Ejecución desde una copia limpia
 
-La secuencia usa `main` una vez fusionados los PR de las cuatro entidades. Si el PR de Reseñas todavía no se ha integrado, ejecutar `git switch --track origin/feature/resenas` después de clonar para verificar esa implementación.
+Los PR de las cuatro entidades y de las evidencias están fusionados en `main` en la versión auditada. La secuencia siguiente utiliza esa rama; las ramas de cada integrante se conservan para contribuciones posteriores.
 
 Requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/), Git y Docker (o un PostgreSQL local).
 
@@ -368,7 +368,7 @@ Ejemplo de PUT sobre un ID existente:
 - POST crea una película con un género existente y devuelve 201.
 - GET por ID devuelve la película o 404 si no existe; los IDs deben ser positivos.
 - PUT reemplaza todos los campos editables y conserva el ID. El género relacionado debe existir.
-- DELETE elimina la película y devuelve 204 sin cuerpo. El modelo elimina sus reseñas asociadas; su comprobación conjunta queda pendiente para la verificación final.
+- DELETE elimina la película y devuelve 204 sin cuerpo. La eliminación de sus reseñas asociadas fue comprobada en T24; la eliminación de reseñas al borrar usuarios fue comprobada en T23.
 - Se permite registrar una película futura. El servicio de Reseñas rechaza publicar o editar una reseña cuando el año de estreno es posterior al actual.
 
 | Campo de entrada | Validación |
@@ -503,13 +503,21 @@ Para PUT, enviar únicamente `puntuacion`, `titulo` y `comentario`.
 
 ## Pruebas
 
-Las funcionalidades ya están implementadas. Por acuerdo del equipo, ahora corresponde completar las solicitudes de `tests_manual/pruebas.http` y los resultados de `tests_manual/evidencias.md`.
+Las solicitudes están en [tests_manual/pruebas.http](tests_manual/pruebas.http) y la matriz con resultados en [tests_manual/evidencias.md](tests_manual/evidencias.md).
 
-La entrega debe incluir al menos seis casos reproducibles con preparación, entrada, resultado esperado y resultado obtenido, cubriendo CRUD, datos inválidos, recurso inexistente, regla de negocio, consulta con filtro/orden/paginación y persistencia. No se considera completada una evidencia hasta ejecutar el caso y registrar su resultado real.
+La ejecución sobre `backend04_pruebas_finales_01` incluye 80 solicitudes HTTP con los estados esperados y comprobaciones de CRUD, validaciones, referencias, reglas, filtro/orden/paginación, cascadas y persistencia. La carga desde cero se respalda con la ejecución inicial aportada por Vicente; la ejecución asistida posterior utilizó esa misma base ya poblada y comprobó también que repetir los seeders conserva las cantidades.
 
-Las pruebas de persistencia deben conservar el volumen. El procedimiento de aislamiento o restablecimiento de los datos de prueba se documentará junto con las evidencias.
+- [Solicitudes, respuestas y comandos](tests_manual/resultados/20261102T050815Z/ejecucion.md).
+- [Resultados estructurados](tests_manual/resultados/20261102T050815Z/resultados.json).
+- [Comprobación suplementaria de persistencia](tests_manual/resultados/20261102T050815Z/persistencia_adicional.json).
 
----
+El intento inicial de reiniciar PostgreSQL mediante Docker CLI falló por permisos del entorno. Se completó mediante Docker Desktop, conservando el volumen, y se comprobó el cambio de inicio del servidor. Ese problema de acceso no equivale al fallo funcional T28, descrito abajo.
+
+La API temporal de la ejecución asistida utilizó el puerto 8002 con el nombre de base explícito; las comprobaciones manuales previas usaron 8001. Los archivos no implican que alguna de esas APIs siga en ejecución.
+
+La tabla principal contiene resultados de los 27 casos previstos. La tabla auxiliar de IDs QA aún debe completarse con los IDs de la corrida correspondiente. Los respaldos históricos, incluido `evidencias_antes.md`, no representan el estado actual.
+
+Para repetir: crear una base exclusiva nueva, aplicar migraciones, ejecutar seeders y seguir las solicitudes en orden. Registrar los nuevos resultados y el commit probado; no reutilizar datos de una corrida anterior como si la base estuviera vacía. El procedimiento detallado está en evidencias.md. La prueba de persistencia conserva el volumen y no utiliza `down -v`.
 
 ## Integrantes y responsabilidades
 
@@ -549,15 +557,40 @@ uv run alembic current
 uv run alembic check
 ```
 
-La prueba del contrato se actualizó para exigir las 21 combinaciones exactas de ruta y método de las cuatro entidades. El equipo reportó siete pruebas aprobadas y `No new upgrade operations detected.` en Alembic durante la revisión de Reseñas. Estos resultados corresponden a esa ejecución; se deben repetir sobre el estado finalmente integrado.
+La prueba del contrato exige las 21 combinaciones exactas de ruta y método. Las siete pruebas se ejecutaron nuevamente sobre la copia del commit integrado `950b047` y aprobaron. Las evidencias previas registran `0001 (head)` y `No new upgrade operations detected.` en Alembic. La auditoría de `950b047` confirmó que el código de aplicación no cambió desde el commit `04576be` probado por HTTP; las diferencias posteriores corresponden a documentación de evidencias.
 
 El resto de la batería conserva principalmente el alcance de Géneros. La comprobación del contrato confirma registro y documentación, no ejecuta las 21 operaciones.
 
-Los tests automatizados invocan las funciones de rutas y servicios con una base SQLite temporal aislada: verifican CRUD, validaciones, excepciones de dominio, contrato y conservación al reabrir conexiones. No son pruebas HTTP de extremo a extremo ni verifican los manejadores HTTP. No sustituyen la prueba de migraciones y reinicio con PostgreSQL. Las evidencias de PostgreSQL se completan en `tests_manual/evidencias.md` después de ejecutar las solicitudes.
+Los tests automatizados invocan las funciones de rutas y servicios con una base SQLite temporal aislada: verifican CRUD, validaciones, excepciones de dominio, contrato y conservación al reabrir conexiones. No son pruebas HTTP de extremo a extremo ni verifican los manejadores HTTP. No sustituyen la prueba de migraciones y reinicio con PostgreSQL. Las comprobaciones HTTP y de PostgreSQL están registradas en `tests_manual/evidencias.md` y sus respaldos. Una nueva modificación de código requiere repetir las pruebas que pueda afectar.
 
-## Primer envío al repositorio
+## Estado de contribuciones e integración
 
-Conserva el `.git` de tu repositorio existente y tu `.env` local al copiar esta base. El paquete no contiene historial Git ni credenciales.
-Antes de agregar archivos revisa `git status --short` y confirma que `.env` y `.venv` están excluidos. Si `.env` ya estaba versionado, `.gitignore` no lo retira del historial.
-El primer commit debe describir el trabajo real, por ejemplo: `Agrega base por capas y CRUD persistente de géneros`.
-Cada integrante debe realizar sus propias contribuciones: mínimo cinco commits significativos, una rama distinta de main y un PR. Esta base no acredita contribuciones de los cuatro.
+El historial incluido en la auditoría de `950b047` conserva commits sin merges y PR fusionados desde las cuatro ramas:
+
+| Integrante | Autor Git | Commits sin merges |
+|---|---|---:|
+| Vicente Fonseca | `vfonseca2026-afk` | 11 |
+| Matías Manquelaf | `mmanquelaf` | 9 |
+| Miguel Torres | `migueltorres2026-ui` | 6 |
+| Danna Ramirez | `Danna-Ramirez` | 6 |
+
+Estos conteos corresponden a esa revisión y aumentarán con los siguientes avances. El historial local no certifica quién abrió o aprobó cada PR, ni el acceso del docente o las reglas activas de protección de GitHub; verificar esos puntos en la plataforma.
+
+## Cierre de entrega y defensa
+
+- Completar los ejemplos de éxito de Usuarios y repetir la generación del contrato y sus pruebas.
+- Completar la tabla auxiliar de IDs QA en evidencias.md usando la corrida correcta.
+- Preparar o verificar la presentación de máximo 15 diapositivas; no se encontró material de defensa en el RAR auditado.
+- Ensayar 10 minutos de presentación/demostración y 5 minutos de preguntas.
+- Cualquier integrante debe poder presentar todo y explicar cualquier recorrido entre capas.
+- Demostrar al menos cuatro endpoints: dos exitosos, un error y una colección con filtro/orden/paginación; mostrar también migraciones, seeders, pruebas y persistencia tras reinicio.
+
+El proyecto no requiere frontend. El cumplimiento técnico no sustituye la presentación y defensa.
+
+## Documentos de seguimiento
+
+- [Backlog actualizado](docs/backlog.md): avances comprobados, pendientes y limitaciones.
+- [Estado inicial histórico](docs/estado-inicial.md): describe únicamente la base de partida; sus pendientes originales no representan el estado final.
+- [Evidencias vigentes](tests_manual/evidencias.md): resultados y alcance de las comprobaciones.
+
+Antes de agregar archivos, revisar `git status --short`; `.env`, `.venv` y credenciales reales no se publican. Si un archivo ya estaba versionado, agregarlo a .gitignore no lo retira del historial.
