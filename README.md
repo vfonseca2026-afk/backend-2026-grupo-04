@@ -2,7 +2,7 @@
 
 Proyecto grupal de **Desarrollo de Backend (ICINF1108)**. API REST, estilo IMDb, donde las personas aficionadas al cine consultan un catálogo de películas organizado por género y publican reseñas con puntuación de 1 a 10.
 
-> **Estado de esta rama (`feature/peliculas`):** CRUD de Géneros, Usuarios y Películas, con filtro, orden y paginación del catálogo y carga inicial explícita de Géneros y Películas. Los cambios de Películas están pendientes de revisión e integración mediante PR. Reseñas y las evidencias finales siguen pendientes. Este documento describe la rama de Miguel; no acredita que Películas ya esté integrado en `main`.
+> **Estado funcional:** implementados los CRUD de Géneros, Usuarios, Películas y Reseñas, con 21 operaciones OpenAPI, consulta combinada de Películas y carga inicial explícita de las cuatro entidades. La prueba del contrato ampliado y las otras seis pruebas locales aprobaron según la ejecución del equipo. Quedan pendientes las verificaciones finales HTTP, cascadas, carga completa desde cero, persistencia y evidencias. La disponibilidad en `main` depende de fusionar el PR de Reseñas; para ejecutar antes del merge, usar `feature/resenas`.
 
 ## Problemática
 
@@ -12,12 +12,12 @@ Quienes ven películas dejan sus opiniones repartidas en redes sociales y chats,
 
 ## Alcance de la versión de trabajo (v0.1.0)
 
-- Implementado: CRUD de Géneros, Usuarios y Películas; DTO, servicios, repositorios, mappers, sesiones por solicitud y errores uniformes.
+- Implementado: CRUD de Géneros, Usuarios, Películas y Reseñas; DTO, servicios, repositorios, mappers, sesiones por solicitud y errores uniformes.
 - Películas permite combinar filtros, orden y paginación sobre PostgreSQL en un mismo GET.
 - Persistencia: cuatro modelos ORM y migración inicial con sus relaciones y restricciones.
-- Carga inicial explícita disponible: Géneros y Películas. Usuarios y Reseñas mantienen sus seeders pendientes según el estado conocido.
-- Pendiente: funcionalidad de Reseñas, seeders restantes, comprobación conjunta de cascadas, pruebas finales, evidencias y defensa.
-- El contrato de esta rama incluye 15 operaciones de Géneros, Usuarios y Películas; Reseñas agrega seis operaciones previstas todavía pendientes.
+- Carga inicial explícita disponible para Géneros, Usuarios, Películas y Reseñas, en ese orden.
+- Pendiente: comprobar las cuatro cargas desde una base vacía, cascadas y persistencia; completar pruebas HTTP, evidencias, revisión final y defensa.
+- Contrato implementado: 21 operaciones, cinco CRUD por entidad y una consulta paginada de reseñas por película.
 - Los archivos con TODO representan trabajo pendiente; las tablas existentes no equivalen a endpoints implementados.
 - El estreno se representa por año, no por fecha exacta. No hay autenticación, permisos, ranking ni frontend.
 - La implementación no equivale a evidencia de ejecución: los casos finales deben comprobarse y registrarse al cerrar el proyecto.
@@ -30,7 +30,7 @@ Las siguientes respuestas definen el escenario propuesto por el equipo; no repre
 - **P2. Actores:** personas aficionadas al cine que consultan y publican opiniones; personas encargadas de mantener el catálogo. Estos actores no implican permisos implementados.
 - **P3. Consecuencias:** dificultad para encontrar opiniones de una película y trabajo manual para mantener títulos y géneros consistentes.
 - **P4. Información:** géneros, usuarios, películas y reseñas, con los atributos y relaciones indicados en los diagramas.
-- **P5. Acciones previstas:** el sistema debe permitir crear géneros; consultar y mantener géneros; registrar usuarios; consultar y mantener usuarios; registrar películas con un género existente; consultar y mantener películas; filtrar, ordenar y paginar el catálogo; publicar una reseña por usuario y película; consultar y editar reseñas; eliminar reseñas; consultar reseñas de una película; recuperar cambios tras reiniciar. Géneros, Usuarios y Películas están disponibles en esta rama; Reseñas sigue pendiente.
+- **P5. Acciones previstas:** el sistema debe permitir crear géneros; consultar y mantener géneros; registrar usuarios; consultar y mantener usuarios; registrar películas con un género existente; consultar y mantener películas; filtrar, ordenar y paginar el catálogo; publicar una reseña por usuario y película; consultar y editar reseñas; eliminar reseñas; consultar reseñas de una película; recuperar cambios tras reiniciar. Las cuatro entidades tienen operaciones implementadas; la aceptación completa requiere las verificaciones finales.
 - **P6. Exclusiones:** frontend, autenticación/autorización, recomendaciones o ranking automático, integración con plataformas externas y moderación automática.
 - **P7. Aceptación prevista:** instalación desde copia limpia; cuatro entidades con ID y cuatro atributos útiles; al menos doce endpoints funcionales; CRUD persistente; rechazo de datos y referencias inválidas; tres reglas de negocio comprobables; filtro, orden y paginación en un mismo GET; seeders con al menos dos registros por entidad; pruebas reproducibles con esperado y obtenido. Estos objetivos no están todos completados.
 
@@ -58,13 +58,13 @@ Aplica la migración sobre una base destinada a este proyecto; si ya tiene tabla
 
 ## Ejecución desde una copia limpia
 
-Para reproducir los cambios de Miguel antes de su integración, se clona `feature/peliculas`. Después del merge se puede clonar `main`.
+La secuencia usa `main` una vez fusionados los PR de las cuatro entidades. Si el PR de Reseñas todavía no se ha integrado, ejecutar `git switch --track origin/feature/resenas` después de clonar para verificar esa implementación.
 
 Requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/), Git y Docker (o un PostgreSQL local).
 
 ```powershell
 # 1. Clonar e instalar dependencias
-git clone --branch feature/peliculas https://github.com/vfonseca2026-afk/backend-2026-grupo-04.git
+git clone https://github.com/vfonseca2026-afk/backend-2026-grupo-04.git
 cd backend-2026-grupo-04
 uv sync
 
@@ -81,7 +81,7 @@ docker compose ps
 # 4. Migraciones (crea las tablas desde cero)
 uv run alembic upgrade head
 
-# 5. Cargar géneros y películas iniciales explícitamente
+# 5. Cargar las cuatro entidades explícitamente
 uv run python -m app.seed
 
 # 6. Iniciar la API
@@ -119,9 +119,11 @@ La aplicación usa el puerto 8000; cambiar el puerto de PostgreSQL no cambia el 
 ### Migraciones y seeders
 
 - **Migraciones:** `migrations/versions/0001_crear_tablas.py` crea `generos`, `usuarios`, `peliculas` y `resenas` desde cero. Se aplican con `uv run alembic upgrade head` y se revierten con `uv run alembic downgrade base`.
-- **Seeders disponibles:** Géneros y Películas. Ejecutar `uv run python -m app.seed` después de aplicar migraciones. Primero se cargan Géneros y después Películas, únicamente si cada tabla está vacía. Una tabla poblada se omite; no se completan cargas parciales. Los seeders de Usuarios y Reseñas siguen pendientes según el estado conocido.
+- **Seeders disponibles:** Géneros, Usuarios, Películas y Reseñas. Ejecutar `uv run python -m app.seed` después de aplicar migraciones. El orden es Géneros → Usuarios → Películas → Reseñas. Cada tabla se carga solo si está vacía; si ya contiene registros, se omite. No se completan cargas parciales.
+- **Datos de Usuarios:** seis usuarios ficticios, cinco activos y uno inactivo.
+- **Datos de Reseñas:** diez reseñas ficticias creadas mediante el servicio sobre combinaciones distintas de usuarios activos y películas estrenadas. Se necesitan al menos diez combinaciones disponibles; las condiciones se comprueban antes de comenzar esa carga. Los IDs se recuperan de la base.
 - **Datos de Películas:** diez películas ficticias repartidas entre dos géneros activos existentes, con diferentes duraciones, años y clasificaciones. Una tiene año de estreno igual al año de ejecución más uno. El seeder requiere al menos dos géneros activos y usa sus IDs reales, sin asumir valores fijos.
-- **Repetición:** en una tabla inicialmente vacía, la primera carga agrega diez películas y la segunda se omite. Si ya había películas, no se agregan las diez de ejemplo.
+- **Repetición y cargas parciales:** repetir la carga completa omite las tablas ya pobladas. Cada repositorio confirma sus operaciones por separado; no existe una transacción única para todos los seeders. Si falla una ejecución después de guardar registros, revisar la carga parcial antes de repetirla. No borrar datos de trabajo para forzar una carga; usar una base de verificación aislada.
 - **Arranque de la API:** iniciar o reiniciar Uvicorn no crea tablas ni ejecuta seeders. Las tablas vacías permanecen vacías hasta ejecutar la carga explícita o crear registros mediante la API.
 - **Reiniciar sin borrar datos:** `docker compose restart db`. Para reiniciar solo la API, detener Uvicorn con Ctrl+C y volver a iniciarlo. No eliminar el volumen para comprobar persistencia.
 - **Restablecimiento destructivo:** `docker compose down -v` elimina el volumen y sus datos. Reservar su uso para una base de pruebas descartable; después hay que levantar PostgreSQL, aplicar migraciones y ejecutar la carga inicial.
@@ -295,51 +297,51 @@ PostgreSQL depende de que las migraciones correspondientes estén aplicadas.
 
 | # | Regla | Respuesta | Estado |
 |---|---|---|---|
-| RN1 | Un usuario solo puede reseñar una película una vez | 409 | ⏳ |
-| RN2 | No se puede reseñar una película cuyo año de estreno sea posterior al año actual | 400 | ⏳ |
-| RN3 | Un usuario inactivo no puede publicar reseñas | 400 | ⏳ |
+| RN1 | Un usuario solo puede reseñar una película una vez | 409 | Implementada |
+| RN2 | No se puede reseñar una película cuyo año de estreno sea posterior al año actual | 400 | Implementada |
+| RN3 | Un usuario inactivo no puede publicar reseñas | 400 | Implementada |
 | RN4 | No se puede eliminar un género que tiene películas | 409 | ✅ |
 
 ### Validaciones de datos
 
 | Tipo | Ejemplo | Estado |
 |---|---|---|
-| Longitud | nombre de género 2–50 caracteres; comentario mínimo 10 | ✅ / ⏳ |
-| Numérica | duración > 0, año >= 1888 y `limite` 1–100 implementados en Películas; puntuación pendiente en la API de Reseñas | Parcial |
+| Longitud | nombre de género 2–50; título de reseña 1–100; comentario 10–2000 | Implementada |
+| Numérica | duración > 0; año >= 1888; límite 1–100; puntuación 1–10 | Implementada |
 | Valores permitidos | clasificación `TP`, `+14`, `+18`; `direccion` asc/desc | Implementado en Películas |
 | Formato | email válido | Implementado en Usuarios |
-| Existencia relacionada | `genero_id` comprobado al crear y actualizar Películas; referencias de Reseñas pendientes | Parcial |
+| Existencia relacionada | Género existente en Películas; usuario y película existentes al publicar Reseñas | Implementada |
 | Regla de negocio | RN1–RN4 | ver arriba |
 
 ---
 
 ## Contrato REST
 
-Documentado en Swagger (`/docs`). Todas las colecciones usan sustantivos en plural.
+Documentado en Swagger (`/docs`). Todas las colecciones usan sustantivos en plural. Estado «Implementado» describe el código y registro de la operación; no acredita su verificación HTTP final.
 
 | Método | URI | Descripción | Éxito | Errores | Estado |
 |---|---|---|---|---|---|
-| POST | `/generos` | Crear género | 201 | 409, 422 | ✅ |
-| GET | `/generos` | Listar géneros | 200 | 422 | ✅ |
-| GET | `/generos/{genero_id}` | Obtener género | 200 | 404, 422 | ✅ |
-| PUT | `/generos/{genero_id}` | Actualizar género | 200 | 404, 409, 422 | ✅ |
-| DELETE | `/generos/{genero_id}` | Eliminar género | 204 | 404, 409, 422 | ✅ |
-| POST | `/usuarios` | Crear usuario | 201 | 409, 422 | Implementado en esta rama |
-| GET | `/usuarios` | Listar usuarios (paginado) | 200 | 422 | Implementado en esta rama |
-| GET | `/usuarios/{usuario_id}` | Obtener usuario | 200 | 404, 422 | Implementado en esta rama |
-| PUT | `/usuarios/{usuario_id}` | Actualizar usuario | 200 | 404, 409, 422 | Implementado en esta rama |
-| DELETE | `/usuarios/{usuario_id}` | Eliminar usuario | 204 | 404, 422 | Implementado en esta rama |
-| POST | `/peliculas` | Crear película | 201 | 404, 422 | Implementado en esta rama |
-| GET | `/peliculas` | Listar con **filtro + orden + paginación** | 200 | 422 | Implementado en esta rama |
-| GET | `/peliculas/{pelicula_id}` | Obtener película | 200 | 404, 422 | Implementado en esta rama |
-| PUT | `/peliculas/{pelicula_id}` | Actualizar película | 200 | 404, 422 | Implementado en esta rama |
-| DELETE | `/peliculas/{pelicula_id}` | Eliminar película | 204 | 404, 422 | Implementado en esta rama |
-| POST | `/resenas` | Crear reseña | 201 | 400, 404, 409, 422 | ⏳ |
-| GET | `/resenas` | Listar reseñas (paginado) | 200 | 422 | ⏳ |
-| GET | `/resenas/{resena_id}` | Obtener reseña | 200 | 404 | ⏳ |
-| PUT | `/resenas/{resena_id}` | Actualizar reseña | 200 | 404, 422 | ⏳ |
-| DELETE | `/resenas/{resena_id}` | Eliminar reseña | 204 | 404 | ⏳ |
-| GET | `/peliculas/{pelicula_id}/resenas` | Reseñas de una película | 200 | 404 | ⏳ |
+| POST | `/generos` | Crear género | 201 | 409, 422 | Implementado |
+| GET | `/generos` | Listar géneros | 200 | 422 | Implementado |
+| GET | `/generos/{genero_id}` | Obtener género | 200 | 404, 422 | Implementado |
+| PUT | `/generos/{genero_id}` | Actualizar género | 200 | 404, 409, 422 | Implementado |
+| DELETE | `/generos/{genero_id}` | Eliminar género | 204 | 404, 409, 422 | Implementado |
+| POST | `/usuarios` | Crear usuario | 201 | 409, 422 | Implementado |
+| GET | `/usuarios` | Listar usuarios (paginado) | 200 | 422 | Implementado |
+| GET | `/usuarios/{usuario_id}` | Obtener usuario | 200 | 404, 422 | Implementado |
+| PUT | `/usuarios/{usuario_id}` | Actualizar usuario | 200 | 404, 409, 422 | Implementado |
+| DELETE | `/usuarios/{usuario_id}` | Eliminar usuario | 204 | 404, 422 | Implementado |
+| POST | `/peliculas` | Crear película | 201 | 404, 422 | Implementado |
+| GET | `/peliculas` | Listar con **filtro + orden + paginación** | 200 | 422 | Implementado |
+| GET | `/peliculas/{pelicula_id}` | Obtener película | 200 | 404, 422 | Implementado |
+| PUT | `/peliculas/{pelicula_id}` | Actualizar película | 200 | 404, 422 | Implementado |
+| DELETE | `/peliculas/{pelicula_id}` | Eliminar película | 204 | 404, 422 | Implementado |
+| POST | `/resenas` | Crear reseña | 201 | 400, 404, 409, 422 | Implementado |
+| GET | `/resenas` | Listar reseñas (paginado) | 200 | 422 | Implementado |
+| GET | `/resenas/{resena_id}` | Obtener reseña | 200 | 404, 422 | Implementado |
+| PUT | `/resenas/{resena_id}` | Actualizar reseña | 200 | 400, 404, 422 | Implementado |
+| DELETE | `/resenas/{resena_id}` | Eliminar reseña | 204 | 404, 422 | Implementado |
+| GET | `/peliculas/{pelicula_id}/resenas` | Reseñas de una película | 200 | 404, 422 | Implementado |
 
 ### Contrato disponible de Géneros
 
@@ -366,8 +368,8 @@ Ejemplo de PUT sobre un ID existente:
 - POST crea una película con un género existente y devuelve 201.
 - GET por ID devuelve la película o 404 si no existe; los IDs deben ser positivos.
 - PUT reemplaza todos los campos editables y conserva el ID. El género relacionado debe existir.
-- DELETE elimina la película y devuelve 204 sin cuerpo. El modelo prevé borrar sus reseñas asociadas; su comprobación conjunta queda pendiente hasta disponer de Reseñas.
-- Se permite registrar una película futura. La prohibición de reseñarla corresponde al servicio de Reseñas, todavía pendiente.
+- DELETE elimina la película y devuelve 204 sin cuerpo. El modelo elimina sus reseñas asociadas; su comprobación conjunta queda pendiente para la verificación final.
+- Se permite registrar una película futura. El servicio de Reseñas rechaza publicar o editar una reseña cuando el año de estreno es posterior al actual.
 
 | Campo de entrada | Validación |
 |---|---|
@@ -441,6 +443,49 @@ Ejemplo sin coincidencias:
 5. El mapper convierte entre modelos ORM y entidades del dominio.
 6. El router devuelve el DTO de respuesta, o el manejador central traduce una excepción controlada.
 
+### Contrato de Reseñas
+
+- POST `/resenas` recibe usuario, película, puntuación, título y comentario. Comprueba referencias existentes, usuario activo, año de estreno permitido y ausencia de reseña previa del mismo usuario para esa película.
+- GET `/resenas` lista por ID ascendente y admite `usuario_id` y `pelicula_id` como filtros opcionales positivos, además de `pagina` (desde 1) y `limite` (1–100). Los filtros sin coincidencias devuelven una colección vacía.
+- GET `/resenas/{resena_id}` consulta por ID positivo o devuelve 404.
+- PUT `/resenas/{resena_id}` exige puntuación, título y comentario. No admite cambiar usuario ni película. Conserva ID y fecha y vuelve a exigir usuario activo y película con año permitido.
+- DELETE `/resenas/{resena_id}` elimina y devuelve 204 sin cuerpo. No exige que el autor continúe activo; una reseña inexistente produce 404.
+- GET `/peliculas/{pelicula_id}/resenas` comprueba la existencia de la película y devuelve sus reseñas paginadas por ID. Una película existente sin reseñas devuelve 200 con colección vacía; una inexistente, 404.
+- La respuesta incluye `id`, `usuario_id`, `pelicula_id`, `puntuacion`, `titulo`, `comentario` y `fecha` generada al crear.
+- Las colecciones devuelven `items`, `total`, `pagina`, `limite` y `total_paginas`. El total se calcula antes de paginar, sobre las coincidencias.
+
+| Campo | Validación |
+|---|---|
+| `usuario_id`, `pelicula_id` | Enteros positivos, obligatorios al crear y no editables |
+| `puntuacion` | Entre 1 y 10, inclusive |
+| `titulo` | Entre 1 y 100 caracteres |
+| `comentario` | Entre 10 y 2000 caracteres |
+
+Los DTO recortan espacios y rechazan campos adicionales. Los errores de esquema producen 422; referencias inexistentes, 404; usuario inactivo o película futura, 400; reseña duplicada, 409. Ante solicitudes simultáneas duplicadas, la restricción única de PostgreSQL conserva la integridad y el manejador de integridad devuelve 409.
+
+Ejemplo de POST —sustituir por IDs reales de un usuario activo y una película estrenada sin reseña previa entre ambos—:
+
+```json
+{
+  "usuario_id": 1,
+  "pelicula_id": 1,
+  "puntuacion": 8,
+  "titulo": "Una historia recomendable",
+  "comentario": "Buenos personajes y una historia entretenida."
+}
+```
+
+Para PUT, enviar únicamente `puntuacion`, `titulo` y `comentario`.
+
+### Recorrido de una publicación de Reseña
+
+1. El DTO valida el cuerpo de POST `/resenas`.
+2. `get_resena_service` construye el servicio con repositorios de Reseñas, Usuarios y Películas que comparten la sesión.
+3. El servicio recupera el usuario y la película, aplica las reglas y comprueba duplicados.
+4. Crea la entidad de dominio y solicita al repositorio su persistencia.
+5. El mapper produce el modelo ORM; SQLAlchemy guarda, confirma y recupera la fila con ID y fecha.
+6. El mapper devuelve la entidad y el router serializa `ResenaResponseDTO` con estado 201.
+
 ### Formato uniforme de errores
 
 ```json
@@ -458,7 +503,7 @@ Ejemplo sin coincidencias:
 
 ## Pruebas
 
-Durante el desarrollo se comprueba cada funcionalidad sin registrar todavía las evidencias formales, por acuerdo del equipo. Al terminar el proyecto se completarán las solicitudes de `tests_manual/pruebas.http` y los resultados de `tests_manual/evidencias.md`.
+Las funcionalidades ya están implementadas. Por acuerdo del equipo, ahora corresponde completar las solicitudes de `tests_manual/pruebas.http` y los resultados de `tests_manual/evidencias.md`.
 
 La entrega debe incluir al menos seis casos reproducibles con preparación, entrada, resultado esperado y resultado obtenido, cubriendo CRUD, datos inválidos, recurso inexistente, regla de negocio, consulta con filtro/orden/paginación y persistencia. No se considera completada una evidencia hasta ejecutar el caso y registrar su resultado real.
 
@@ -504,7 +549,9 @@ uv run alembic current
 uv run alembic check
 ```
 
-Las pruebas incluidas originalmente se diseñaron para la API de Géneros. Si conservan una aserción de cinco operaciones OpenAPI, debe actualizarse para el contrato ampliado: esta rama registra 15 operaciones, sin contar documentación. No eliminar comprobaciones para ocultar fallos.
+La prueba del contrato se actualizó para exigir las 21 combinaciones exactas de ruta y método de las cuatro entidades. El equipo reportó siete pruebas aprobadas y `No new upgrade operations detected.` en Alembic durante la revisión de Reseñas. Estos resultados corresponden a esa ejecución; se deben repetir sobre el estado finalmente integrado.
+
+El resto de la batería conserva principalmente el alcance de Géneros. La comprobación del contrato confirma registro y documentación, no ejecuta las 21 operaciones.
 
 Los tests automatizados invocan las funciones de rutas y servicios con una base SQLite temporal aislada: verifican CRUD, validaciones, excepciones de dominio, contrato y conservación al reabrir conexiones. No son pruebas HTTP de extremo a extremo ni verifican los manejadores HTTP. No sustituyen la prueba de migraciones y reinicio con PostgreSQL. Las evidencias de PostgreSQL se completan en `tests_manual/evidencias.md` después de ejecutar las solicitudes.
 
