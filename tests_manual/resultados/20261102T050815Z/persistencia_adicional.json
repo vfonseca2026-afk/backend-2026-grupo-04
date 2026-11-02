@@ -1,0 +1,46 @@
+{
+  "database": "backend04_pruebas_finales_01",
+  "before_restart": "2026-11-02 04:39:05.852476+00:00",
+  "created": {
+    "id": 14,
+    "usuario_id": 7,
+    "pelicula_id": 11,
+    "puntuacion": 8,
+    "titulo": "Prueba reinicio PostgreSQL",
+    "comentario": "Registro exclusivo para comprobar persistencia tras reinicio real.",
+    "fecha": "2026-11-02T05:10:45.054392Z"
+  },
+  "modified": {
+    "id": 14,
+    "usuario_id": 7,
+    "pelicula_id": 11,
+    "puntuacion": 9,
+    "titulo": "Persistencia PostgreSQL confirmable",
+    "comentario": "Modificacion que debe conservarse despues de reiniciar PostgreSQL.",
+    "fecha": "2026-11-02T05:10:45.054392Z"
+  },
+  "after_restart": "2026-11-02 05:11:08.248629+00:00",
+  "first_get_status": 500,
+  "retry_status": 200,
+  "recovered": {
+    "id": 14,
+    "usuario_id": 7,
+    "pelicula_id": 11,
+    "puntuacion": 9,
+    "titulo": "Persistencia PostgreSQL confirmable",
+    "comentario": "Modificacion que debe conservarse despues de reiniciar PostgreSQL.",
+    "fecha": "2026-11-02T05:10:45.054392Z"
+  },
+  "passed": true,
+  "after_api_restart_status": 200,
+  "after_api_restart_body": {
+    "id": 14,
+    "usuario_id": 7,
+    "pelicula_id": 11,
+    "puntuacion": 9,
+    "titulo": "Persistencia PostgreSQL confirmable",
+    "comentario": "Modificacion que debe conservarse despues de reiniciar PostgreSQL.",
+    "fecha": "2026-11-02T05:10:45.054392Z"
+  },
+  "additional_issue": "Reiniciar solo PostgreSQL manteniendo API abierta: primer GET 500 por conexión caducada; reintento 200. Reiniciar también API: primer GET 200 y contenido íntegro."
+}
