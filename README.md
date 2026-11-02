@@ -2,7 +2,7 @@
 
 Proyecto grupal de **Desarrollo de Backend (ICINF1108)**. API REST, estilo IMDb, donde las personas aficionadas al cine consultan un catálogo de películas organizado por género y publican reseñas con puntuación de 1 a 10.
 
-> **Estado:** las cuatro entidades están implementadas e integradas en `main`, con 21 operaciones OpenAPI y cuatro seeders explícitos. Hay evidencias de 80 solicitudes HTTP con los códigos esperados y siete pruebas automatizadas aprobadas. Quedan por cerrar los ejemplos explícitos de respuestas exitosas de Usuarios, algunos metadatos de evidencias y la presentación/ensayo. La limitación de reconexión T28 está documentada y no corregida.
+> **Estado:** las cuatro entidades están implementadas e integradas en `main`, con 21 operaciones OpenAPI y cuatro seeders explícitos. Hay evidencias de 80 solicitudes HTTP con los códigos esperados y siete pruebas automatizadas aprobadas.
 
 ## Problemática
 
