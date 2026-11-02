@@ -144,13 +144,65 @@ class BaseInicialTests(unittest.TestCase):
             self.assertEqual(modelo.nombre, 'Persistente editado')
         self.assertEqual(self.request('GET', f'/generos/{ident}')[1]['descripcion'], 'Conservado')
 
-    def test_contrato_solo_publica_cinco_operaciones(self):
-        status, schema = self.request('GET', '/openapi.json')
+    def test_contrato_publica_operaciones_de_las_cuatro_entidades(self):
+        status, schema = self.request("GET", "/openapi.json")
         self.assertEqual(status, 200)
-        operaciones = [(path, method) for path, methods in schema['paths'].items()
-                       for method in methods if method in {'get', 'post', 'put', 'patch', 'delete'}]
-        self.assertEqual(len(operaciones), 5)
-        self.assertEqual({path for path, _ in operaciones}, {'/generos', '/generos/{genero_id}'})
+
+        metodos_http = {
+            "get",
+            "post",
+            "put",
+            "patch",
+            "delete",
+            "head",
+            "options",
+            "trace",
+        }
+
+        operaciones = {
+            (path, method)
+            for path, contenido in schema["paths"].items()
+            for method in contenido
+            if method in metodos_http
+        }
+
+        esperadas = set()
+
+        recursos = [
+            ("generos", "genero_id"),
+            ("usuarios", "usuario_id"),
+            ("peliculas", "pelicula_id"),
+            ("resenas", "resena_id"),
+        ]
+
+        for recurso, parametro_id in recursos:
+            coleccion = f"/{recurso}"
+            individual = f"/{recurso}/{{{parametro_id}}}"
+
+            esperadas.update({
+                (coleccion, "post"),
+                (coleccion, "get"),
+                (individual, "get"),
+                (individual, "put"),
+                (individual, "delete"),
+            })
+
+        esperadas.add((
+            "/peliculas/{pelicula_id}/resenas",
+            "get",
+        ))
+
+        faltantes = esperadas - operaciones
+        adicionales = operaciones - esperadas
+
+        self.assertEqual(
+            operaciones,
+            esperadas,
+            msg=(
+                f"Operaciones faltantes: {sorted(faltantes)}. "
+                f"Operaciones adicionales: {sorted(adicionales)}."
+            ),
+        )
 
 
 if __name__ == '__main__':
