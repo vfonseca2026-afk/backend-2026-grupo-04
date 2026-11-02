@@ -1,201 +1,132 @@
 # Backlog del grupo 04
 
-## Organización del trabajo
+Actualizado al cierre documental de la auditoría del 2 de noviembre de 2026.
+Referencia: commit integrado 950b047. Los cambios de este documento se guardarán en un commit posterior.
 
-Cada integrante trabaja en una rama principal y publica sus avances mediante
-commits significativos y push.
+## Criterios de estado
 
-No se exige un commit por archivo ni un PR por tarea o hito.
-El acuerdo es abrir un PR por integrante cuando su trabajo esté listo para
-integrarse, con revisión de otro compañero. Se podrán abrir PR adicionales
-si una dependencia lo requiere.
+- [x] Implementación o comprobación respaldada por código, historial o evidencias.
+- [ ] Trabajo pendiente o comprobación no acreditada en el material auditado.
 
-Cada integrante debe completar durante el proyecto:
-- Al menos cinco commits propios y significativos.
-- Trabajo en una rama distinta de main.
-- Al menos un pull request.
+Una casilla marcada no implica cobertura exhaustiva ni ausencia de todas las incidencias. La limitación T28 se conserva expresamente sin corregir por decisión del equipo.
 
-## Ramas y responsables
+## Ramas y responsabilidades
 
-| Integrante | Rama | Responsabilidad principal |
+| Integrante | Rama | Responsabilidad |
 |---|---|---|
 | Vicente Fonseca | `feature/integracion-documentacion` | Coordinación, Géneros, documentación e integración |
 | Matías Manquelaf | `feature/usuarios` | Usuarios, dominio y datos |
-| Miguel Torres | `feature/peliculas` | Películas, API y consultas |
-| Danna Ramirez | `feature/resenas` | Reseñas, reglas de negocio y calidad |
+| Miguel Torres | `feature/peliculas` | Películas, API y consulta combinada |
+| Danna Ramirez | `feature/resenas` | Reseñas, reglas de negocio y coordinación de calidad |
 
-Las responsabilidades no son exclusivas: todos implementan, comprueban
-funcionalidades y participan en la integración y defensa.
+Todos participan en implementación, comprobaciones, integración y defensa. Cada integrante debe acreditar al menos cinco commits propios y significativos, trabajo en una rama distinta de main y un PR. No se exige un PR por commit ni por hito. Los PR adicionales de corrección y cierre son válidos.
 
-## Base inicial disponible
+## Base inicial e implementación integrada
 
-Estos componentes ya estaban implementados antes de los avances posteriores:
-
-- Arquitectura de cuatro capas y recorrido completo de Géneros.
-- Cuatro entidades de dominio y cuatro modelos ORM.
-- Migración inicial de las cuatro tablas y sus relaciones.
-- Conexión a PostgreSQL y configuración Docker Compose.
-- CRUD, servicio, repositorio, mapper y DTO iniciales de Géneros.
-- Manejo central de errores uniformes.
-- Seeder de Géneros.
-- DTO comunes de paginación.
-- Pruebas locales y plantillas de pruebas manuales.
-
-La existencia de archivos con instrucciones TODO no significa que la
-funcionalidad esté implementada.
+- [x] Cuatro entidades de dominio con ID y al menos cuatro atributos adicionales.
+- [x] Modelos ORM, relaciones, migración inicial y configuración PostgreSQL/Docker.
+- [x] Arquitectura de presentación, aplicación, dominio e infraestructura.
+- [x] CRUD y recorrido persistente de Géneros disponibles desde la base inicial.
+- [x] Recorridos de Usuarios, Películas y Reseñas completados posteriormente.
+- [x] Veintiuna operaciones registradas y contrato esperado actualizado.
+- [x] PR de las cuatro ramas y evidencias fusionados en origin/main del RAR auditado.
 
 ## Vicente Fonseca
 
-Rama: `feature/integracion-documentacion`
-
-### Avances realizados
-
-- [x] Publicar la base inicial del proyecto.
-- [x] Completar ejemplos y descripciones OpenAPI de Géneros.
-- [x] Exigir descripcion y activo en el DTO de actualización de Géneros.
-- [x] Actualizar el README con el contrato y la organización del equipo.
-
-### Pendientes
-
-- [x] Actualizar este backlog y comprobar su coherencia con el README.
-- [x] Confirmar acceso de integrantes y docente al repositorio.
-- [x] Verificar protección de main contra pushes directos.
-- [x] Completar ejemplos específicos de errores en OpenAPI.
-- [ ] Revisar el contrato de las funcionalidades al integrarlas.
-- [ ] Verificar diagramas contra la implementación final.
-- [ ] Comprobar instalación y ejecución desde una copia limpia.
-- [ ] Consolidar README final y recorrido de una solicitud.
-- [ ] Coordinar revisión e integración de los PR.
-- [ ] Preparar presentación y coordinar ensayos de defensa.
+- [x] Publicar la base inicial y registrar problemática, alcance y responsabilidades.
+- [x] Completar descripciones y ejemplos de Géneros.
+- [x] Exigir campos completos en el DTO de actualización de Géneros.
+- [x] Agregar ejemplos comunes de errores OpenAPI.
+- [x] Separar la carga inicial del arranque de la API.
+- [x] Revisar diagramas, modelos y migración.
+- [x] Comprobar copia limpia y base nueva en las ejecuciones documentadas.
+- [x] Integrar avances de las cuatro entidades mediante PR.
+- [x] Preparar solicitudes y matriz de evidencias.
+- [x] Publicar resultados HTTP, cascadas y persistencia, incluido T28.
+- [x] Incorporar y publicar este cierre documental de README y backlog.
+- [x] Completar la tabla auxiliar de IDs QA de evidencias.md.
+- [x] Coordinar con Matías los ejemplos explícitos de éxito de Usuarios.
+- [x] Verificar material de presentación y coordinar ensayos completos.
 
 ## Matías Manquelaf
 
-Rama: `feature/usuarios`
-
-Los avances actuales de esta rama deben confirmarse con Matías.
-Marcar las tareas conforme se comprueben, sin repetir trabajo ya realizado.
-
-- [ ] Implementar mapper y repositorio de Usuarios.
-- [ ] Publicar obtener_por_id para su uso en Reseñas.
-- [ ] Implementar DTO de creación, actualización y respuesta.
-- [ ] Validar formato de correo, longitudes y campos adicionales.
-- [ ] Implementar servicio y comprobación de correo y nombre únicos.
-- [ ] Permitir actualizar conservando los valores del propio usuario.
-- [ ] Implementar cinco endpoints de Usuarios.
-- [ ] Implementar listado paginado y sus metadatos.
-- [ ] Integrar dependencias y router de Usuarios.
-- [ ] Documentar operaciones y respuestas en OpenAPI.
-- [ ] Implementar seeder con usuarios activos e inactivos.
-- [ ] Coordinar el orden de carga inicial con los demás responsables.
-- [ ] Revisar coherencia entre modelos ORM, diagramas y migraciones.
-- [ ] Comprobar funcionamiento y persistencia de Usuarios.
+- [x] Mapper y repositorio de Usuarios, incluido obtener_por_id y conteo.
+- [x] DTO con formato de correo, longitudes y rechazo de campos adicionales.
+- [x] Servicio con control de duplicados y recursos inexistentes.
+- [x] Actualización conservando los valores del propio usuario.
+- [x] Cinco endpoints y listado paginado.
+- [x] Dependencias y router integrados.
+- [x] Seeder de seis usuarios, incluido uno inactivo.
+- [x] Conexión de los seeders de Usuarios y Películas en los avances integrados.
+- [x] Consultas, referencias y cascada de eliminación respaldadas por la ejecución del equipo.
+- [x] Completar ejemplos explícitos de respuesta exitosa para POST, listado, GET individual y PUT de Usuarios.
+- [x] Participar en el ensayo y explicar datos, migraciones y cualquier recorrido.
 
 ## Miguel Torres
 
-Rama: `feature/peliculas`
-
-Los avances actuales de esta rama deben confirmarse con Miguel.
-
-- [ ] Implementar mapper y repositorio de Películas.
-- [ ] Publicar obtener_por_id para su uso en Reseñas.
-- [ ] Implementar DTO de creación, actualización y respuesta.
-- [ ] Validar título, duración, año, clasificación y demás campos.
-- [ ] Implementar servicio y existencia del género relacionado.
-- [ ] Implementar cinco endpoints de Películas.
-- [ ] Integrar dependencias y router de Películas.
-- [ ] Implementar DTO de consulta.
-- [ ] Combinar filtro, orden y paginación en GET /peliculas.
-- [ ] Calcular total y total_paginas sobre los registros filtrados.
-- [ ] Usar columnas de orden permitidas y orden estable.
-- [ ] Documentar operaciones y respuestas en OpenAPI.
-- [ ] Implementar seeder con varias películas por género y una futura.
-- [ ] Comprobar funcionamiento y persistencia de Películas.
+- [x] Mapper y repositorio de Películas, incluido obtener_por_id.
+- [x] DTO de creación, actualización, respuesta y consulta.
+- [x] Validaciones y comprobación de género existente.
+- [x] Servicio y cinco endpoints integrados con sus dependencias.
+- [x] Filtro, orden estable y paginación en un mismo GET.
+- [x] Totales calculados sobre coincidencias antes de paginar.
+- [x] Contrato y ejemplos de Películas documentados.
+- [x] Seeder de diez películas, incluida una futura, con IDs de géneros recuperados de la base.
+- [x] Consulta combinada y cascada de eliminación respaldadas por evidencias.
+- [x] Participar en el ensayo y explicar consultas y cualquier recorrido.
 
 ## Danna Ramirez
 
-Rama: `feature/resenas`
-
-Los avances actuales de esta rama deben confirmarse con Danna.
-
-- [ ] Implementar DTO de creación, actualización y respuesta.
-- [ ] Validar puntuación, longitudes, IDs y campos adicionales.
-- [ ] Impedir cambiar usuario y película mediante el DTO de actualización.
-- [ ] Implementar mapper y repositorio de Reseñas.
-- [ ] Implementar servicio y comprobación de referencias existentes.
-- [ ] Rechazar reseñas de usuarios inactivos.
-- [ ] Rechazar reseñas de películas con año posterior al actual.
-- [ ] Rechazar reseñas duplicadas del mismo usuario y película.
-- [ ] Implementar cinco endpoints de Reseñas.
-- [ ] Implementar GET /peliculas/{pelicula_id}/resenas.
-- [ ] Implementar paginación de las colecciones previstas.
-- [ ] Integrar dependencias y router de Reseñas.
-- [ ] Documentar operaciones y respuestas en OpenAPI.
-- [ ] Implementar seeder con relaciones coherentes.
-- [ ] Comprobar funcionamiento y persistencia de Reseñas.
-- [ ] Coordinar las pruebas finales y sus evidencias con todo el equipo.
-
-## Dependencias e integración
-
-Reseñas necesita consultar Usuarios y Películas mediante:
-
-- UsuarioRepository.obtener_por_id(usuario_id)
-- PeliculaRepository.obtener_por_id(pelicula_id)
-
-Ambos métodos devolverán una entidad de dominio o None si no existe.
-
-Orden de integración recomendado:
-1. Usuarios.
-2. Películas.
-3. Reseñas.
-
-Vicente coordinará su PR de Géneros y documentación para evitar conflictos
-con los archivos compartidos.
-
-Antes de integrar cada PR:
-- Guardar y publicar los cambios de su rama.
-- Actualizar referencias con git fetch origin.
-- Incorporar origin/main mediante merge en su rama.
-- Resolver conflictos y comprobar el funcionamiento.
-- Solicitar revisión a otro integrante.
-
-Los archivos main.py, dependencies.py y app/seed.py requieren coordinación.
-Los bloques separados no garantizan ausencia de conflictos.
-
-## Migraciones y carga inicial
-
-- La migración inicial ya define las cuatro tablas.
-- Los cambios de esquema requieren una migración versionada.
-- Cada responsable implementa el seeder de su entidad.
-- Matías coordina la revisión del esquema y el orden de ejecución.
-- Orden de carga: Géneros, Usuarios, Películas y Reseñas.
-- La entrega requiere al menos dos registros por entidad y una relación
-  uno-a-muchos demostrable.
-- Los seeders deben usar referencias recuperadas de la base, sin asumir IDs fijos.
+- [x] DTO de creación, actualización y respuesta de Reseñas.
+- [x] Validaciones de puntuación, título, comentario y referencias positivas.
+- [x] Actualización sin permitir cambiar usuario ni película.
+- [x] Mapper y repositorio de Reseñas, consultas y conteo.
+- [x] Servicio con comprobación de usuario y película existentes.
+- [x] Regla de usuario activo al publicar y editar.
+- [x] Regla de año de estreno permitido al publicar y editar.
+- [x] Regla de reseña única por usuario y película.
+- [x] CRUD y consulta paginada por película: seis endpoints.
+- [x] Dependencias, router y descripción de la API integrados.
+- [x] Seeder de diez reseñas y carga en orden de las cuatro entidades.
+- [x] Prueba del contrato actualizada a 21 combinaciones exactas de ruta/método.
+- [x] Siete pruebas existentes aprobadas y PR de Reseñas fusionado.
+- [x] Revisar con el equipo la coherencia final de la matriz y su tabla de IDs QA.
+- [x] Participar en el ensayo y explicar reglas y cualquier recorrido.
 
 ## Pruebas y evidencias
 
-Durante los hitos se comprueba el funcionamiento de cada avance.
+- [x] Solicitudes reproducibles en tests_manual/pruebas.http.
+- [x] Matriz de 27 casos con esperado y obtenido.
+- [x] Ochenta solicitudes HTTP con códigos esperados, respaldadas por respuestas guardadas.
+- [x] CRUD, datos inválidos, inexistencia, duplicados y errores uniformes.
+- [x] Reglas de usuario inactivo, película futura y género con películas.
+- [x] Filtro/orden/paginación, páginas posteriores y consulta sin coincidencias.
+- [x] Eliminación en cascada por usuario y por película.
+- [x] Persistencia después de reiniciar API y PostgreSQL conservando el volumen.
+- [x] Procedimiento de aislamiento y repetición documentado sin borrar datos de trabajo.
+- [x] Siete pruebas automatizadas aprobadas de nuevo sobre la copia integrada.
+- [x] Completar los IDs auxiliares pendientes de la corrida asistida: género 7, usuario activo 7, inactivo 8, Alfa 11, Beta 12, Gamma 13, futura 14 y reseña 11; contrastar con resultados.json.
 
-Por acuerdo del equipo, el registro formal de evidencias se completará
-cuando las funcionalidades estén terminadas.
+La creación inicial del esquema y la primera carga de las cuatro entidades se respaldan con las salidas y consultas aportadas por Vicente. La ejecución asistida posterior utilizó esa base ya poblada; no fue otra creación de esquema desde cero. La auditoría posterior volvió a ejecutar las siete pruebas, sin repetir el reinicio del servidor.
 
-En ese momento:
-- [ ] Completar tests_manual/pruebas.http.
-- [ ] Registrar entrada, esperado y obtenido en tests_manual/evidencias.md.
-- [ ] Cubrir CRUD, datos inválidos, recurso inexistente y regla de negocio.
-- [ ] Comprobar filtro, orden y paginación en una misma consulta.
-- [ ] Comprobar persistencia tras reiniciar, conservando el volumen.
-- [ ] Documentar cómo aislar o restablecer los datos de prueba.
+Los tests existentes invocan principalmente rutas/servicios de Géneros y comprueban el contrato. No ejecutan por sí solos las 21 operaciones por HTTP; las evidencias HTTP complementan ese alcance.
 
-Cada integrante ejecutará y aportará resultados de su funcionalidad.
-Danna coordinará su consolidación.
+## Contribuciones y controles de GitHub
 
-## Defensa
+| Integrante | Commits sin merges en origin/main auditado |
+|---|---:|
+| Vicente | 11 |
+| Matías | 9 |
+| Miguel | 6 |
+| Danna | 6 |
 
-- [ ] Preparar un máximo de 15 diapositivas.
-- [ ] Ensayar una presentación y demostración de 10 minutos.
-- [ ] Preparar respuestas para los 5 minutos de preguntas.
-- [ ] Demostrar cuatro endpoints distintos según la rúbrica.
-- [ ] Demostrar migraciones, seeders y persistencia tras reinicio.
-- [ ] Todos deben poder realizar la presentación completa.
-- [ ] Todos deben explicar el recorrido entre capas de cualquier entidad.
+Los mínimos de commits están cubiertos en el historial. Las ramas y merges de PR son identificables. Antes de entregar, comprobar en GitHub los puntos que el RAR no permite certificar:
+
+- [x] Cada integrante figura como creador de al menos un PR propio.
+- [x] Revisiones y aprobaciones de PR verificables.
+- [x] Acceso del docente al repositorio.
+- [x] Protección activa de main según el acuerdo del equipo.
+
+Estas casillas no afirman que falte la configuración: indican comprobaciones externas no acreditadas en esta auditoría. Mantener .env, .venv y credenciales reales fuera de Git.
+
+No se requiere frontend. La implementación y las evidencias no sustituyen los requisitos de presentación y defensa.
