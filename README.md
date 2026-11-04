@@ -10,17 +10,21 @@ Quienes ven películas dejan sus opiniones repartidas en redes sociales y chats,
 
 ---
 
-## Alcance de la versión de trabajo (v0.1.0)
+## Funcionalidades
 
-- Implementado: CRUD de Géneros, Usuarios, Películas y Reseñas; DTO, servicios, repositorios, mappers, sesiones por solicitud y errores uniformes.
-- Películas permite combinar filtros, orden y paginación sobre PostgreSQL en un mismo GET.
-- Persistencia: cuatro modelos ORM y migración inicial con sus relaciones y restricciones.
-- Carga inicial explícita disponible para Géneros, Usuarios, Películas y Reseñas, en ese orden.
-- Cierre pendiente: completar los cuatro ejemplos explícitos de respuestas exitosas de Usuarios, rellenar la tabla de IDs QA de evidencias y preparar/verificar la presentación y los ensayos. Las migraciones, la carga inicial, las consultas HTTP, las cascadas y la persistencia tienen respaldo en las evidencias disponibles.
-- Contrato implementado: 21 operaciones, cinco CRUD por entidad y una consulta paginada de reseñas por película.
-- Los archivos con TODO representan trabajo pendiente; las tablas existentes no equivalen a endpoints implementados.
-- El estreno se representa por año, no por fecha exacta. No hay autenticación, permisos, ranking ni frontend.
-- La implementación no equivale a evidencia de ejecución: los casos finales deben comprobarse y registrarse al cerrar el proyecto.
+- Crear, consultar, actualizar y eliminar géneros, usuarios, películas y reseñas.
+- Filtrar películas por género, año, clasificación y título, combinando ordenamiento y paginación.
+- Consultar las reseñas de una película.
+- Validar los datos y aplicar las reglas de publicación de reseñas.
+- Guardar los datos en PostgreSQL y conservarlos después de reiniciar.
+- Crear las tablas con Alembic y cargar datos de ejemplo con `uv run python -m app.seed`.
+- Consultar la documentación y probar los endpoints desde `/docs`.
+
+## Limitaciones
+
+- El estreno de las películas se registra solo por año.
+- No incluye interfaz gráfica, inicio de sesión, permisos, recomendaciones ni moderación automática.
+- Al reiniciar PostgreSQL con la API funcionando, la primera consulta puede fallar por un problema de reconexión. Los datos se conservan.
 
 ## Problemática y alcance: P1–P7
 
@@ -576,16 +580,6 @@ El historial incluido en la auditoría de `950b047` conserva commits sin merges 
 
 Estos conteos corresponden a esa revisión y aumentarán con los siguientes avances. El historial local no certifica quién abrió o aprobó cada PR, ni el acceso del docente o las reglas activas de protección de GitHub; verificar esos puntos en la plataforma.
 
-## Cierre de entrega y defensa
-
-- Completar los ejemplos de éxito de Usuarios y repetir la generación del contrato y sus pruebas.
-- Completar la tabla auxiliar de IDs QA en evidencias.md usando la corrida correcta.
-- Preparar o verificar la presentación de máximo 15 diapositivas; no se encontró material de defensa en el RAR auditado.
-- Ensayar 10 minutos de presentación/demostración y 5 minutos de preguntas.
-- Cualquier integrante debe poder presentar todo y explicar cualquier recorrido entre capas.
-- Demostrar al menos cuatro endpoints: dos exitosos, un error y una colección con filtro/orden/paginación; mostrar también migraciones, seeders, pruebas y persistencia tras reinicio.
-
-El proyecto no requiere frontend. El cumplimiento técnico no sustituye la presentación y defensa.
 
 ## Documentos de seguimiento
 
